@@ -27,7 +27,7 @@ export default function Home() {
       {/* ═══ HERO ═══ */}
       <section className="relative h-screen w-full overflow-hidden" style={{ background: 'var(--theme-bg)' }}>
         {/* Teks konten — pt-28 untuk memberi jarak dibawah navbar di mobile */}
-        <div className="max-w-6xl mx-auto px-6 md:px-4 pt-28 pb-10 md:py-0 w-full relative z-20 h-full flex flex-col md:justify-center">
+        <div className="max-w-6xl mx-auto px-6 md:px-4 pt-32 pb-10 md:py-0 w-full relative z-20 h-full flex flex-col md:justify-center">
           <div className="max-w-xl space-y-6">
             <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Elegansi<br />
@@ -37,7 +37,7 @@ export default function Home() {
               Standar baru dalam pelayanan penyewaan mobil mewah untuk perjalanan eksklusif Anda.
             </p>
           </div>
-          <div className="flex items-center pt-10 md:pt-0 md:mt-8 w-full md:w-auto">
+          <div className="flex items-center pt-28 md:pt-0 md:mt-8 w-full md:w-auto">
             <Link href="/katalog" className="px-10 py-5 bg-[#C5A059] text-white font-bold rounded-full hover:bg-[#B38D46] shadow-xl shadow-[#C5A059]/10 transition-all flex items-center gap-3 active:scale-95 group w-full md:w-auto justify-center md:justify-start border border-[#C5A059]/50">
               Reservasi Eksklusif <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
@@ -67,7 +67,7 @@ export default function Home() {
               <div className="absolute -inset-4 bg-gradient-to-r from-[#C5A059]/20 to-transparent blur-2xl rounded-full z-0 pointer-events-none"></div>
               <div className={`relative z-10 rounded-[2.5rem] overflow-hidden shadow-2xl ${isDark ? 'border border-neutral-800/80' : 'border border-slate-200'}`}>
                 <img
-                  src="https://images.unsplash.com/photo-1563720223185-11003d516935?q=80&w=2000&auto=format&fit=crop"
+                  src="https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?q=80&w=2069&auto=format&fit=crop"
                   alt="Mobil Hitam Mewah PointRental"
                   className="w-full aspect-[3/4] md:aspect-[16/9] object-cover object-center hover:scale-105 transition-transform duration-1000"
                 />
@@ -196,8 +196,8 @@ export default function Home() {
               Suara dari Mereka yang <span className="text-gold-premium">Puas</span>
             </h2>
           </div>
-          {/* 1 kolom di mobile, 3 kolom di desktop */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* 1 kolom di mobile, 2 kolom di tablet, 3 kolom di desktop */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((t, i) => (
               <TestimonialCard key={i} testimonial={t} />
             ))}
