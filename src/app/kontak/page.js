@@ -32,7 +32,7 @@ function useCountUp(end, duration = 2000) {
 }
 
 export default function Contact() {
-    const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+    const [formData, setFormData] = useState({ name: '', phone: '', subject: '', message: '' });
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [isDark, setIsDark] = useState(true);
@@ -53,10 +53,16 @@ export default function Contact() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // Buat format pesan WhatsApp
+        const waNumber = "6281283891670"; // Nomor my
+        const waText = `Halo Tim PointRental,%0A%0A${formData.message}`;
+        window.open(`https://wa.me/${waNumber}?text=${waText}`, '_blank');
+
         setFormSubmitted(true);
         setTimeout(() => {
             setFormSubmitted(false);
-            setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+            setFormData({ name: '', phone: '', subject: '', message: '' });
         }, 3000);
     };
 
@@ -161,39 +167,27 @@ export default function Contact() {
                                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                                     className="w-full border rounded-xl py-3 px-4 text-sm font-medium outline-none transition-all placeholder:text-gray-400 focus:border-[#C5A059]/50 focus:shadow-md"
                                                     style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
-                                                    placeholder="John Doe" />
+                                                    placeholder="Nama Anda" />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <label className="text-[10px] font-bold uppercase tracking-widest pl-1" style={{ color: 'var(--theme-text-muted)' }}>Email</label>
-                                                <input type="email" required value={formData.email}
-                                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                                    className="w-full border rounded-xl py-3 px-4 text-sm font-medium outline-none transition-all placeholder:text-gray-400 focus:border-[#C5A059]/50 focus:shadow-md"
-                                                    style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
-                                                    placeholder="john@example.com" />
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-1.5">
-                                                <label className="text-[10px] font-bold uppercase tracking-widest pl-1" style={{ color: 'var(--theme-text-muted)' }}>No. Telepon</label>
-                                                <input type="tel" value={formData.phone}
+                                                <label className="text-[10px] font-bold uppercase tracking-widest pl-1" style={{ color: 'var(--theme-text-muted)' }}>No. WhatsApp</label>
+                                                <input type="tel" required value={formData.phone}
                                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                     className="w-full border rounded-xl py-3 px-4 text-sm font-medium outline-none transition-all placeholder:text-gray-400 focus:border-[#C5A059]/50 focus:shadow-md"
                                                     style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
                                                     placeholder="+62 8xx xxxx xxxx" />
                                             </div>
-                                            <div className="space-y-1.5">
-                                                <label className="text-[10px] font-bold uppercase tracking-widest pl-1" style={{ color: 'var(--theme-text-muted)' }}>Subjek</label>
-                                                <select value={formData.subject}
-                                                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                                                    className="w-full border rounded-xl py-3 px-4 text-sm font-medium outline-none transition-all focus:border-[#C5A059]/50 focus:shadow-md"
-                                                    style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}>
-                                                    <option value="">Pilih subjek...</option>
-                                                    <option value="reservasi">Reservasi Mobil</option>
-                                                    <option value="corporate">Corporate Partnership</option>
-                                                    <option value="wedding">Wedding Car</option>
-                                                    <option value="pertanyaan">Pertanyaan Umum</option>
-                                                </select>
-                                            </div>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10px] font-bold uppercase tracking-widest pl-1" style={{ color: 'var(--theme-text-muted)' }}>Subjek</label>
+                                            <select required value={formData.subject}
+                                                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                                                className="w-full border rounded-xl py-3 px-4 text-sm font-medium outline-none transition-all focus:border-[#C5A059]/50 focus:shadow-md"
+                                                style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}>
+                                                <option value="">Pilih subjek...</option>
+                                                <option value="reservasi">Reservasi Mobil</option>
+                                                <option value="pertanyaan">Pertanyaan Umum</option>
+                                            </select>
                                         </div>
                                         <div className="space-y-1.5">
                                             <label className="text-[10px] font-bold uppercase tracking-widest pl-1" style={{ color: 'var(--theme-text-muted)' }}>Pesan Anda</label>

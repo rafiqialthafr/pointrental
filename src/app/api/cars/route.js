@@ -10,7 +10,11 @@ function getCars() {
 }
 
 function saveCars(cars) {
-    fs.writeFileSync(dbPath, JSON.stringify(cars, null, 4), 'utf8');
+    try {
+        fs.writeFileSync(dbPath, JSON.stringify(cars, null, 4), 'utf8');
+    } catch (e) {
+        console.warn('[Vercel FS Bypass] Could not write cars:', e.message);
+    }
 }
 
 export async function GET() {
@@ -32,7 +36,11 @@ export async function POST(req) {
             const buffer = Buffer.from(bytes);
             const fileName = `${Date.now()}_${imageFile.name.replace(/\s+/g, '_')}`;
             const filePath = path.join(uploadDir, fileName);
-            fs.writeFileSync(filePath, buffer);
+            try {
+                fs.writeFileSync(filePath, buffer);
+            } catch (e) {
+                console.warn('[Vercel FS Bypass] Could not write image:', e.message);
+            }
             imageUrl = `/uploads/${fileName}`;
         } else if (!imageUrl) {
             imageUrl = "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1200&auto=format&fit=crop";

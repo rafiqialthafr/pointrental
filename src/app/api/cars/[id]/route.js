@@ -10,7 +10,11 @@ function getCars() {
 }
 
 function saveCars(cars) {
-    fs.writeFileSync(dbPath, JSON.stringify(cars, null, 4), 'utf8');
+    try {
+        fs.writeFileSync(dbPath, JSON.stringify(cars, null, 4), 'utf8');
+    } catch (e) {
+        console.warn('[Vercel FS Bypass] Could not write cars:', e.message);
+    }
 }
 
 export async function PATCH(req, context) {
@@ -36,7 +40,11 @@ export async function PATCH(req, context) {
             const buffer = Buffer.from(bytes);
             const fileName = `${Date.now()}_${imageFile.name.replace(/\s+/g, '_')}`;
             const filePath = path.join(uploadDir, fileName);
-            fs.writeFileSync(filePath, buffer);
+            try {
+                fs.writeFileSync(filePath, buffer);
+            } catch (e) {
+                console.warn('[Vercel FS Bypass] Could not write image:', e.message);
+            }
             imageUrl = `/uploads/${fileName}`;
         }
 

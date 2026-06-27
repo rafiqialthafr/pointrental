@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server';
-import { getBookings, saveBookings } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req, { params }) {
     try {
-        const bookings = getBookings();
-        const booking = bookings.find(b => b.id === params.id);
-        if (!booking) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-        return NextResponse.json(booking);
+        const { data, error } = await supabase
+            .from('bookings')
+            .select('*')
+            .eq('id', params.id)
+            .single();
+
+        if (error || !data) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+        return NextResponse.json(data);
     } catch (err) {
         return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }
@@ -18,18 +22,18 @@ export async function PATCH(req, context) {
     try {
         const { id } = await context.params;
         const body = await req.json();
-        const bookings = getBookings();
-        const index = bookings.findIndex(b => b.id === id);
 
-        if (index === -1) {
-            return NextResponse.json({ error: 'Not found' }, { status: 404 });
-        }
+        const { data, error } = await supabase
+            .from('bookings')
+            .update({ ...body, updatedAt: new Date().toISOString() })
+            .eq('id', id)
+            .select()
+            .single();
 
-        bookings[index] = { ...bookings[index], ...body, updatedAt: new Date().toISOString() };
-        saveBookings(bookings);
+        if (error) throw error;
 
-        return NextResponse.json({ success: true, booking: bookings[index] });
+        return NextResponse.json({ success: true, booking: data });
     } catch (err) {
-        return NextResponse.json({ success: false }, { status: 500 });
+        return NextResponse.json({ success: false, error: err.message }, { status: 500 });
     }
 }

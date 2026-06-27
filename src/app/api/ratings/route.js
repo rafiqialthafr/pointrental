@@ -1,26 +1,25 @@
 import { NextResponse } from 'next/server';
-import { getRatings, saveRatings } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
-// GET /api/ratings?carId=car_1  (or without query to get all)
+// GET /api/ratings?carId=car_1
 export async function GET(req) {
     try {
         const { searchParams } = new URL(req.url);
         const carId = searchParams.get('carId');
-        const ratings = getRatings();
+
+        let query = supabase.from('ratings').select('*').order('createdAt', { ascending: false });
+        if (carId) query = query.eq('carId', carId);
+
+        const { data: ratings, error } = await query;
+        if (error) throw error;
 
         if (carId) {
-            const carRatings = ratings.filter(r => r.carId === carId);
-            const avg = carRatings.length > 0
-                ? Math.round((carRatings.reduce((sum, r) => sum + r.score, 0) / carRatings.length) * 10) / 10
+            const avg = ratings.length > 0
+                ? Math.round((ratings.reduce((sum, r) => sum + r.score, 0) / ratings.length) * 10) / 10
                 : 0;
-            return NextResponse.json({
-                carId,
-                average: avg,
-                total: carRatings.length,
-                ratings: carRatings
-            });
+            return NextResponse.json({ carId, average: avg, total: ratings.length, ratings });
         }
 
         return NextResponse.json(ratings);
@@ -38,12 +37,9 @@ export async function POST(req) {
         if (!carId || !name || !score) {
             return NextResponse.json({ error: 'carId, name, dan score wajib diisi' }, { status: 400 });
         }
-
         if (score < 1 || score > 5) {
             return NextResponse.json({ error: 'Score harus 1-5' }, { status: 400 });
         }
-
-        const ratings = getRatings();
 
         const newRating = {
             id: `rating-${Date.now()}`,
@@ -54,19 +50,16 @@ export async function POST(req) {
             createdAt: new Date().toISOString()
         };
 
-        ratings.push(newRating);
-        saveRatings(ratings);
+        const { error } = await supabase.from('ratings').insert([newRating]);
+        if (error) throw error;
 
-        // Calculate new average
-        const carRatings = ratings.filter(r => r.carId === carId);
-        const avg = Math.round((carRatings.reduce((sum, r) => sum + r.score, 0) / carRatings.length) * 10) / 10;
+        // Hitung average baru
+        const { data: carRatings } = await supabase.from('ratings').select('score').eq('carId', carId);
+        const avg = carRatings && carRatings.length > 0
+            ? Math.round((carRatings.reduce((sum, r) => sum + r.score, 0) / carRatings.length) * 10) / 10
+            : Number(score);
 
-        return NextResponse.json({
-            success: true,
-            rating: newRating,
-            newAverage: avg,
-            totalRatings: carRatings.length
-        });
+        return NextResponse.json({ success: true, rating: newRating, newAverage: avg, totalRatings: carRatings?.length || 1 });
     } catch (error) {
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }

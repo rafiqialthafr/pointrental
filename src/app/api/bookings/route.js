@@ -1,13 +1,17 @@
 import { NextResponse } from 'next/server';
-import { getBookings, saveBookings } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        const bookings = getBookings();
-        bookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        return NextResponse.json(bookings);
+        const { data, error } = await supabase
+            .from('bookings')
+            .select('*')
+            .order('createdAt', { ascending: false });
+
+        if (error) throw error;
+        return NextResponse.json(data);
     } catch (err) {
         return NextResponse.json({ error: 'Failed to fetch bookings' }, { status: 500 });
     }
@@ -16,17 +20,20 @@ export async function GET() {
 export async function POST(req) {
     try {
         const body = await req.json();
-        const bookings = getBookings();
 
         const newBooking = {
             id: `INV-${Date.now()}`,
             ...body,
             status: 'PAID',
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
         };
 
-        bookings.push(newBooking);
-        saveBookings(bookings);
+        const { error } = await supabase
+            .from('bookings')
+            .insert([newBooking]);
+
+        if (error) throw error;
 
         return NextResponse.json({ success: true, booking: newBooking });
     } catch (error) {

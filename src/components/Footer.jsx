@@ -1,5 +1,6 @@
 ﻿import Link from 'next/link';
 import { Car, Phone, Mail, MapPin } from 'lucide-react';
+import { FacebookIcon, InstagramIcon, TikTokIcon } from './Icons';
 
 export default function Footer() {
     return (
@@ -72,10 +73,19 @@ export default function Footer() {
 
                 {/* Bottom Bar */}
                 <div className="mt-20 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <p className="text-xs text-gray-500 font-medium">© 2026 PointRental. Prestise Berkendara.</p>
-                    <div className="flex items-center gap-8">
-                        <Link href="#" className="text-xs text-gray-500 font-bold hover:text-[#C5A059] transition-colors">Kebijakan Privasi</Link>
-                        <Link href="#" className="text-xs text-gray-500 font-bold hover:text-[#C5A059] transition-colors">Syarat Layanan</Link>
+                    <p className="text-xs text-gray-500 font-medium">© 2026 PointRental. All Rights Reserved.</p>
+
+                    {/* Social Media Icons */}
+                    <div className="flex items-center gap-5">
+                        <Link href="#" aria-label="Facebook" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
+                            <FacebookIcon className="w-4 h-4" />
+                        </Link>
+                        <Link href="#" aria-label="Instagram" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
+                            <InstagramIcon className="w-4 h-4" />
+                        </Link>
+                        <Link href="#" aria-label="TikTok" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
+                            <TikTokIcon className="w-4 h-4" />
+                        </Link>
                     </div>
                 </div>
             </div>
