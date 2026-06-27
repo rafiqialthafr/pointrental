@@ -1,0 +1,146 @@
+[
+    {
+        "id": "car_1",
+        "brand": "Toyota",
+        "model": "Alphard HV Premium",
+        "type": "MPV",
+        "transmission": "Otomatis",
+        "fuel": "Hybrid",
+        "pricePerDay": 2900000,
+        "status": "Tersedia",
+        "rating": 4.9,
+        "seats": 7,
+        "image": "/uploads/1782270128959_Gemini_Generated_Image_d52km0d52km0d52k.png",
+        "gallery": [
+            "/uploads/1782270128959_Gemini_Generated_Image_d52km0d52km0d52k.png"
+        ],
+        "features": [
+            "Driver Profesional",
+            "WiFi Gratis",
+            "Asuransi Full",
+            "Bahan Bakar Hybrid"
+        ],
+        "description": "Toyota Alphard HV Premium menghadirkan pengalaman berkendara mewah dengan interior kulit premium, sistem hiburan layar ganda, dan efisiensi bahan bakar hybrid terbaik di kelasnya.",
+        "terms": "Minimal sewa 1 hari. Deposit Rp 5.000.000. Termasuk driver dan BBM dalam kota. Denda keterlambatan Rp 200.000/jam."
+    },
+    {
+        "id": "car_2",
+        "brand": "Toyota",
+        "model": "Fortuner Legender",
+        "type": "SUV",
+        "transmission": "Otomatis",
+        "fuel": "Diesel",
+        "pricePerDay": 1200000,
+        "status": "Tersedia",
+        "rating": 4.8,
+        "seats": 7,
+        "image": "/uploads/1782270163287_Gemini_Generated_Image_czobwtczobwtczob.png",
+        "gallery": [
+            "/uploads/1782270163287_Gemini_Generated_Image_czobwtczobwtczob.png"
+        ],
+        "features": [
+            "Off-Road Ready",
+            "Sunroof Panoramic",
+            "7 Kursi Lega",
+            "Cruise Control"
+        ],
+        "description": "Toyota Fortuner Legender dirancang untuk menaklukkan segala medan. Dengan mesin diesel turbo yang bertenaga dan interior premium, SUV ini siap menjadi partner perjalanan Anda.",
+        "terms": "Minimal sewa 1 hari. Deposit Rp 1.500.000. Tidak termasuk driver dan BBM. Denda keterlambatan Rp 150.000/jam."
+    },
+    {
+        "id": "car_3",
+        "brand": "Honda",
+        "model": "Civic RS Turbo",
+        "type": "Sedan",
+        "transmission": "Otomatis",
+        "fuel": "Bensin",
+        "pricePerDay": 950000,
+        "status": "Tersedia",
+        "rating": 4.7,
+        "seats": 5,
+        "image": "/uploads/1782271140278_Gemini_Generated_Image_nyf6s4nyf6s4nyf6.png",
+        "gallery": [
+            "/uploads/1782271140278_Gemini_Generated_Image_nyf6s4nyf6s4nyf6.png"
+        ],
+        "features": [
+            "Sport Mode",
+            "Honda Sensing",
+            "Bose Sound System",
+            "Reverse Camera"
+        ],
+        "description": "Honda Civic RS Turbo memberikan sensasi berkendara sporty dengan mesin VTEC Turbo 1.5L. Interior futuristik dengan layar sentuh 9 inci dan sistem keselamatan Honda Sensing.",
+        "terms": "Minimal sewa 1 hari. Deposit Rp 1.250.000. Tidak termasuk driver dan BBM. Denda keterlambatan Rp 100.000/jam."
+    },
+    {
+        "id": "car_4",
+        "brand": "Hyundai",
+        "model": "Ioniq 5 Electric",
+        "type": "SUV",
+        "transmission": "Otomatis",
+        "fuel": "Listrik",
+        "pricePerDay": 1800000,
+        "status": "Tersedia",
+        "rating": 5,
+        "seats": 5,
+        "image": "/uploads/1782271162358_Gemini_Generated_Image_2syctm2syctm2syc.png",
+        "gallery": [
+            "/uploads/1782271162358_Gemini_Generated_Image_2syctm2syctm2syc.png"
+        ],
+        "features": [
+            "Full Electric",
+            "V2L Charging",
+            "Zero Emission",
+            "Autopilot Ready"
+        ],
+        "description": "Hyundai Ioniq 5 adalah masa depan mobilitas listrik. Dengan jarak tempuh hingga 481 km per charge dan kemampuan fast charging ultra-cepat dari 10% ke 80% hanya dalam 18 menit.",
+        "terms": "Minimal sewa 1 hari. Deposit Rp 2.000.000. Charging station disediakan. Tidak termasuk driver. Denda keterlambatan Rp 200.000/jam."
+    },
+    {
+        "id": "car_5",
+        "brand": "Mitsubishi",
+        "model": "Pajero Sport Dakar",
+        "type": "SUV",
+        "transmission": "Otomatis",
+        "fuel": "Diesel",
+        "pricePerDay": 1100000,
+        "status": "Tersedia",
+        "rating": 4.8,
+        "seats": 6,
+        "image": "/uploads/1782271182864_Gemini_Generated_Image_rd844zrd844zrd84.png",
+        "gallery": [
+            "/uploads/1782271182864_Gemini_Generated_Image_rd844zrd844zrd84.png"
+        ],
+        "features": [
+            "Super Select 4WD",
+            "Panoramic Sunroof",
+            "JBL Audio",
+            "Hill Descent Control"
+        ],
+        "description": "Mitsubishi Pajero Sport Dakar Ultimate menggunakan sistem penggerak Super Select 4WD-II yang tangguh. Interior mewah dan fitur keamanan canggih.",
+        "terms": "Minimal sewa 1 hari. Deposit Rp 1.500.000. Tidak termasuk driver dan BBM. Denda keterlambatan Rp 150.000/jam."
+    },
+    {
+        "id": "car_6",
+        "brand": "Mercedes-Benz",
+        "model": "C-Class C300 AMG",
+        "type": "Sedan",
+        "transmission": "Otomatis",
+        "fuel": "Bensin",
+        "pricePerDay": 3500000,
+        "status": "Tersedia",
+        "rating": 5,
+        "seats": 5,
+        "image": "/uploads/1782271202472_Gemini_Generated_Image_oy9hzfoy9hzfoy9h.png",
+        "gallery": [
+            "/uploads/1782271202472_Gemini_Generated_Image_oy9hzfoy9hzfoy9h.png"
+        ],
+        "features": [
+            "AMG Line Eksterior",
+            "Burmester Sound",
+            "MBUX System",
+            "Ambient Lighting"
+        ],
+        "description": "Mercedes-Benz C300 AMG Line menggabungkan performa mesin turbocharged 2.0L dengan kemewahan khas Mercedes. Dilengkapi sistem infotainment MBUX dan interior Artico/microfiber.",
+        "terms": "Minimal sewa 2 hari. Deposit Rp 5.000.000. Termasuk driver profesional. Denda keterlambatan Rp 500.000/jam."
+    }
+]

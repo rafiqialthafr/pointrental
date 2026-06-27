@@ -1,0 +1,74 @@
+[
+  {
+    "id": "rating-1782274898837",
+    "carId": "car_4",
+    "name": "aw aw",
+    "score": 1,
+    "review": "keren",
+    "createdAt": "2026-06-24T04:21:38.837Z"
+  },
+  {
+    "id": "rating-1782274923177",
+    "carId": "car_4",
+    "name": "bagus",
+    "score": 5,
+    "review": "bagus hebat\n",
+    "createdAt": "2026-06-24T04:22:03.177Z"
+  },
+  {
+    "id": "rating-1782275008020",
+    "carId": "car_4",
+    "name": "y",
+    "score": 5,
+    "review": "ha",
+    "createdAt": "2026-06-24T04:23:28.020Z"
+  },
+  {
+    "id": "rating-1782275024023",
+    "carId": "car_4",
+    "name": "bagyu",
+    "score": 4,
+    "review": "asjdhsbd",
+    "createdAt": "2026-06-24T04:23:44.023Z"
+  },
+  {
+    "id": "rating-1782275041516",
+    "carId": "car_4",
+    "name": "waw",
+    "score": 5,
+    "review": "keren hebat",
+    "createdAt": "2026-06-24T04:24:01.516Z"
+  },
+  {
+    "id": "rating-1782275062652",
+    "carId": "car_4",
+    "name": "ya",
+    "score": 5,
+    "review": "haha\n",
+    "createdAt": "2026-06-24T04:24:22.653Z"
+  },
+  {
+    "id": "rating-1782275071410",
+    "carId": "car_4",
+    "name": "w",
+    "score": 5,
+    "review": "a",
+    "createdAt": "2026-06-24T04:24:31.410Z"
+  },
+  {
+    "id": "rating-1782276162514",
+    "carId": "car_4",
+    "name": "gokokres",
+    "score": 5,
+    "review": "",
+    "createdAt": "2026-06-24T04:42:42.514Z"
+  },
+  {
+    "id": "rating-1782306202373",
+    "carId": "car_5",
+    "name": "bagus",
+    "score": 5,
+    "review": "hebat",
+    "createdAt": "2026-06-24T13:03:22.373Z"
+  }
+]

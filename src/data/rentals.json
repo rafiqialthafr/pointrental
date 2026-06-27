@@ -1,0 +1,24 @@
+[
+  {
+    "id": "rent_1780043640263",
+    "carId": "car_3",
+    "userName": "uuuu",
+    "userEmail": "rarar@gmail.com",
+    "startDate": "2026-05-22",
+    "endDate": "2026-05-28",
+    "totalPrice": 6650000,
+    "status": "pending",
+    "createdAt": "2026-05-29T08:34:00.263Z"
+  },
+  {
+    "id": "rent_1780043986242",
+    "startDate": "2026-05-29",
+    "endDate": "2026-06-04",
+    "userName": "ujik",
+    "userEmail": "shs@gmail.com",
+    "carId": "car_2",
+    "totalPrice": 8400000,
+    "status": "pending",
+    "createdAt": "2026-05-29T08:39:46.242Z"
+  }
+]
