@@ -18,6 +18,7 @@ export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState('Dashboard');
     const [isAuth, setIsAuth] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // Modal forms states
     const [showCarModal, setShowCarModal] = useState(false);
@@ -155,7 +156,7 @@ export default function AdminDashboard() {
     if (!isAuth) return <div className="min-h-screen bg-[#F4F7FE]"></div>;
     if (loading) return <div className="min-h-screen bg-[#F4F7FE] flex items-center justify-center font-bold text-slate-500 font-sans">Memuat Portal Admin...</div>;
 
-    const recentActivity = bookings.slice(0, 3);
+    const recentActivity = bookings.slice(0, 10);
 
     const filteredBookings = bookings.filter(b =>
         (b.customerName?.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -410,7 +411,10 @@ export default function AdminDashboard() {
     return (
         <div className="min-h-screen bg-[#F4F7FE] flex text-slate-800 font-sans selection:bg-[#C5A059]/20 selection:text-slate-900">
             {/* ═══ SIDEBAR ═══ */}
-            <aside className="w-[260px] bg-[#0f172a] text-white flex-shrink-0 flex flex-col fixed inset-y-0 left-0 z-20 shadow-2xl">
+            <aside className={`w-[260px] bg-[#0f172a] text-white flex-shrink-0 flex flex-col fixed inset-y-0 left-0 z-30 shadow-2xl transition-transform duration-300 transform ${isMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+                <button onClick={() => setIsMenuOpen(false)} className="lg:hidden absolute top-6 right-6 text-slate-400 hover:text-white">
+                    <X className="w-6 h-6" />
+                </button>
                 <div className="h-20 flex items-center px-8 border-b border-slate-800/50 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-[#C5A059]/10 blur-[40px] rounded-full"></div>
                     <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center mr-3 shadow-lg relative z-10">
@@ -425,7 +429,7 @@ export default function AdminDashboard() {
                 <div className="flex-1 overflow-y-auto py-6 px-4 space-y-6">
                     <div>
                         <p className="px-4 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-3">Overview</p>
-                        <button onClick={() => setActiveTab('Dashboard')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === 'Dashboard' ? 'bg-[#C5A059]/10 text-amber-400 border border-[#C5A059]/20 shadow-inner' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}>
+                        <button onClick={() => { setActiveTab('Dashboard'); setIsMenuOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === 'Dashboard' ? 'bg-[#C5A059]/10 text-amber-400 border border-[#C5A059]/20 shadow-inner' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}>
                             <LayoutDashboard className="w-5 h-5" />
                             <span className="text-sm">Dashboard</span>
                         </button>
@@ -435,7 +439,7 @@ export default function AdminDashboard() {
                         <p className="px-4 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-3">Manajemen</p>
                         <div className="space-y-1">
                             {menuManajemen.map((item, i) => (
-                                <button key={i} onClick={() => setActiveTab(item.name)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === item.name ? 'bg-[#C5A059]/10 text-amber-400 border border-[#C5A059]/20 shadow-inner' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}>
+                                <button key={i} onClick={() => { setActiveTab(item.name); setIsMenuOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === item.name ? 'bg-[#C5A059]/10 text-amber-400 border border-[#C5A059]/20 shadow-inner' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}>
                                     {item.icon}
                                     <span className="text-sm">{item.name}</span>
                                 </button>
@@ -446,7 +450,7 @@ export default function AdminDashboard() {
                     <div>
                         <p className="px-4 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-3">Sistem</p>
                         <div className="space-y-1">
-                            <button onClick={() => setActiveTab('Pengaturan')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === 'Pengaturan' ? 'bg-[#C5A059]/10 text-amber-400 border border-[#C5A059]/20 shadow-inner' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}>
+                            <button onClick={() => { setActiveTab('Pengaturan'); setIsMenuOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === 'Pengaturan' ? 'bg-[#C5A059]/10 text-amber-400 border border-[#C5A059]/20 shadow-inner' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}>
                                 <Settings className="w-5 h-5" />
                                 <span className="text-sm">Pengaturan</span>
                             </button>
@@ -466,13 +470,23 @@ export default function AdminDashboard() {
                 </div>
             </aside>
 
+            {/* Backdrop for mobile */}
+            {isMenuOpen && <div className="fixed inset-0 bg-black/50 z-20 lg:hidden" onClick={() => setIsMenuOpen(false)}></div>}
+
             {/* ═══ MAIN CONTENT ═══ */}
-            <main className="flex-1 ml-[260px] flex flex-col min-h-screen relative">
+            <main className="flex-1 lg:ml-[260px] flex flex-col min-h-screen relative">
                 {/* Topbar */}
-                <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm/50">
-                    <div>
-                        <h2 className="text-2xl font-bold text-slate-800 font-sans tracking-tight">{activeTab}</h2>
-                        <p className="text-sm text-slate-500 font-medium">{currentDate}</p>
+                <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-10 shadow-sm/50">
+                    <div className="flex items-center gap-4">
+                        <button onClick={() => setIsMenuOpen(true)} className="lg:hidden p-2 hover:bg-slate-100 rounded-lg">
+                            <div className="w-6 h-1 bg-slate-600 mb-1 rounded-full"></div>
+                            <div className="w-6 h-1 bg-slate-600 mb-1 rounded-full"></div>
+                            <div className="w-6 h-1 bg-slate-600 rounded-full"></div>
+                        </button>
+                        <div>
+                            <h2 className="text-lg md:text-2xl font-bold text-slate-800 font-sans tracking-tight line-clamp-1">{activeTab}</h2>
+                            <p className="text-[10px] md:text-sm text-slate-500 font-medium">{currentDate}</p>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-6">
