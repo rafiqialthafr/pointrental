@@ -96,7 +96,7 @@ export default function About() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                         {/* Visi */}
                         <div className={`rounded-2xl p-8 md:p-10 border shadow-2xl relative overflow-hidden ${isDark ? 'bg-gradient-to-br from-[#131825] to-[#0B0F19] border-[#C5A059]/20' : 'bg-white border-slate-200'}`}>
-                            <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-[#C5A059]/8 blur-[60px]" />
+                            <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-[40px]" />
                             <div className="relative z-10">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="w-10 h-10 rounded-xl bg-[#C5A059]/10 flex items-center justify-center">

@@ -28,7 +28,7 @@ export default function Home() {
       {/* w-full: lebar 100% dari awal (mobile), h-screen: tinggi sesuaikan layar */}
       <section className="relative h-screen w-full overflow-hidden" style={{ background: 'var(--theme-bg)' }}>
         {/* Layout utama hero: menggunakan flex flex-col menata vertikal. pt-28 pb-8 mencegah nabrak navbar dan memberi ruang di HP */}
-        <div className="max-w-6xl mx-auto px-6 md:px-4 pt-16 pb-10 md:py-0 w-full relative z-20 h-full flex flex-col md:justify-center">
+        <div className="max-w-6xl mx-auto px-6 md:px-4 pt-20 pb-10 md:py-0 w-full relative z-20 h-full flex flex-col md:justify-center">
 
           {/* Teks mengisi sisa ruang secara dinamis di tengah layar */}
           <div className="max-w-xl space-y-6 flex-1 flex flex-col justify-center md:flex-none">

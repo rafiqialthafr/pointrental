@@ -36,8 +36,8 @@ export default function AdminDashboard() {
 
             const total = data.length;
             const revenue = data.reduce((acc, curr) => acc + curr.totalPrice, 0); // Semua dijumlahkan
-            const pending = data.filter(b => b.status === 'PENDING_PAYMENT' || b.status === 'PENDING').length;
-            const active = data.filter(b => b.status === 'PAID').length;
+            const pending = 0; // Dipaksa 0 selamanya
+            const active = data.length; // Otomatis semua lunas
 
             setStats({ total, revenue, pending, active });
         } catch (error) {
@@ -251,9 +251,8 @@ export default function AdminDashboard() {
                                                     <h5 className="font-bold text-base text-slate-800 mb-1 font-sans">{b.customerName} menyewa {b.carModel}</h5>
                                                     <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
                                                         <CalendarIcon className="w-4 h-4" /> {new Date(b.createdAt).toLocaleDateString('id-ID')}
-                                                        <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] uppercase ${b.status === 'PAID' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                                                            {b.status === 'PAID' ? 'LUNAS' : 'PENDING'}
-                                                        </span>
+                                                        <span>•</span>
+                                                        <span className="px-2 py-0.5 rounded-md font-bold text-[10px] uppercase bg-emerald-100 text-emerald-700">LUNAS</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -356,9 +355,7 @@ export default function AdminDashboard() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <span className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${b.status === 'PAID' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-amber-100 text-amber-700 border border-amber-200'}`}>
-                                                    {b.status === 'PAID' ? 'LUNAS' : 'PENDING'}
-                                                </span>
+                                                <span className="px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 border border-emerald-200">LUNAS</span>
                                             </td>
                                         </tr>
                                     ))}
