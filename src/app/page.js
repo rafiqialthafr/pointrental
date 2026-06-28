@@ -26,21 +26,25 @@ export default function Home() {
 
       {/* ═══ HERO ═══ */}
       <section className="relative h-screen w-full overflow-hidden" style={{ background: 'var(--theme-bg)' }}>
-        {/* Teks konten — pt-28 untuk memberi jarak dibawah navbar di mobile */}
-        <div className="max-w-6xl mx-auto px-6 md:px-4 pt-32 pb-10 md:py-0 w-full relative z-20 h-full flex flex-col md:justify-center">
-          <div className="max-w-xl space-y-6">
-            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              Elegansi<br />
-              <span className="text-gold-premium">Berkendara</span>
-            </h1>
-            <p className={`text-lg md:text-xl font-medium leading-relaxed max-w-sm ${isDark ? 'text-gray-400' : 'text-slate-800'}`}>
-              Standar baru dalam pelayanan penyewaan mobil mewah untuk perjalanan eksklusif Anda.
-            </p>
-          </div>
-          <div className="flex items-center pt-28 md:pt-0 md:mt-8 w-full md:w-auto">
-            <Link href="/katalog" className="px-10 py-5 bg-[#C5A059] text-white font-bold rounded-full hover:bg-[#B38D46] shadow-xl shadow-[#C5A059]/10 transition-all flex items-center gap-3 active:scale-95 group w-full md:w-auto justify-center md:justify-start border border-[#C5A059]/50">
-              Reservasi Eksklusif <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
+        {/* Teks konten — layout flex-col agar teks di atas, button sebelum area mobil */}
+        <div className="max-w-6xl mx-auto px-6 md:px-4 pt-20 md:pt-0 pb-0 md:py-0 w-full relative z-20 h-full flex flex-col md:justify-center">
+          {/* Area teks: di mobile sisakan ruang 50% bawah untuk gambar mobil */}
+          <div className="flex flex-col h-full md:h-auto md:block">
+            <div className="max-w-xl space-y-4 md:space-y-6 pt-4 md:pt-0">
+              <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                Elegansi<br />
+                <span className="text-gold-premium">Berkendara</span>
+              </h1>
+              <p className={`text-base md:text-xl font-medium leading-relaxed max-w-sm ${isDark ? 'text-gray-400' : 'text-slate-800'}`}>
+                Standar baru dalam pelayanan penyewaan mobil mewah untuk perjalanan eksklusif Anda.
+              </p>
+            </div>
+            {/* Button: mt-auto mendorong ke bawah teks, mb-[52%] memberi jarak dari area gambar mobil */}
+            <div className="mt-auto mb-[52%] md:mb-0 md:mt-8 flex items-center w-full md:w-auto">
+              <Link href="/katalog" className="px-8 py-4 md:px-10 md:py-5 bg-[#C5A059] text-white font-bold rounded-full hover:bg-[#B38D46] shadow-xl shadow-[#C5A059]/10 transition-all flex items-center gap-3 active:scale-95 group w-full md:w-auto justify-center md:justify-start border border-[#C5A059]/50">
+                Reservasi Eksklusif <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
           </div>
         </div>
 
