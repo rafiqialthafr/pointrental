@@ -268,10 +268,10 @@ export default function CarDetail() {
 
             <section className="flex-grow py-8 md:py-12">
                 <div className="max-w-6xl mx-auto px-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                    <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-12">
 
-                        {/* ─── LEFT: CONTENT ─── */}
-                        <div className="lg:col-span-7 xl:col-span-8 space-y-8">
+                        {/* ─── 1. GAMBAR MOBIL (Mobile: Paling atas) ─── */}
+                        <div className="order-1 lg:col-span-7 xl:col-span-8">
                             <div className={`${isDark ? 'bg-[#0B0F19] rounded-[2.5rem] overflow-hidden border border-neutral-900 shadow-sm relative aspect-video' : 'bg-[#F4F7FE] rounded-[2.5rem] overflow-hidden border border-neutral-900 shadow-sm relative aspect-video'}`}>
                                 <img
                                     src={car.image}
@@ -285,7 +285,10 @@ export default function CarDetail() {
                                     </span>
                                 </div>
                             </div>
+                        </div>
 
+                        {/* ─── 3. DETAIL KONTEN MOBIL (Mobile: Paling bawah) ─── */}
+                        <div className="order-3 lg:col-span-7 xl:col-span-8 lg:col-start-1 lg:row-start-2">
                             <div className={`${isDark ? 'bg-[#0B0F19] rounded-[2.5rem] p-8 md:p-12 border border-neutral-900 shadow-sm' : 'bg-[#F4F7FE] rounded-[2.5rem] p-8 md:p-12 border border-neutral-900 shadow-sm'}`}>
                                 <div className="mb-10">
                                     <p className="text-sm font-bold text-[#C5A059] uppercase tracking-[0.4em] mb-3">Unit Premium Edition</p>
@@ -469,8 +472,8 @@ export default function CarDetail() {
                             </div>
                         </div>
 
-                        {/* ─── RIGHT: CHECKOUT ─── */}
-                        <div className="lg:col-span-5 xl:col-span-4">
+                        {/* ─── 2. CHECKOUT (Mobile: Langsung di bawah gambar) ─── */}
+                        <div className="order-2 lg:col-span-5 xl:col-span-4 lg:col-start-8 xl:col-start-9 lg:row-start-1 lg:row-span-2">
                             <div className="sticky top-28 space-y-6">
                                 <div className={`${isDark ? 'bg-[#0B0F19] rounded-[2.5rem] p-8 md:p-10 border border-neutral-800 shadow-2xl shadow-black/[0.02] relative overflow-hidden' : 'bg-[#F4F7FE] rounded-[2.5rem] p-8 md:p-10 border border-neutral-800 shadow-2xl shadow-black/[0.02] relative overflow-hidden'}`}>
 

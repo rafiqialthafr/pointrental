@@ -22,6 +22,13 @@ export default function Navbar() {
         setIsLight(!isLight);
     };
 
+    const handleNavLinkClick = (e, href) => {
+        if (href === '/' && pathname === '/') {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
     const navLinks = [
         { label: 'Beranda', href: '/' },
         { label: 'Katalog', href: '/katalog' },
@@ -37,7 +44,7 @@ export default function Navbar() {
                 }`}>
                 <div className="flex items-center justify-between">
                     {/* Brand */}
-                    <Link href="/" className="flex items-center gap-2.5 group">
+                    <Link href="/" onClick={(e) => handleNavLinkClick(e, '/')} className="flex items-center gap-2.5 group">
                         <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow ${isDark
                             ? (isScrolled ? 'bg-gradient-to-br from-[#0B0F19] to-[#131831]' : 'bg-[#0B0F19]/40 border border-white/10')
                             : (isScrolled ? 'bg-white border border-slate-200' : 'bg-white/60 border border-black/5')
@@ -60,6 +67,7 @@ export default function Navbar() {
                             <Link
                                 key={link.label}
                                 href={link.href}
+                                onClick={(e) => handleNavLinkClick(e, link.href)}
                                 className={`px-4 py-2 text-sm font-bold transition-all duration-300 hover:text-[#C5A059] hover:drop-shadow-[0_0_8px_rgba(197,160,89,0.4)] ${isDark ? 'text-gray-300' : 'text-slate-900'}`}
                             >
                                 {link.label}
@@ -73,9 +81,9 @@ export default function Navbar() {
                         {/* Theme Toggle */}
                         <button
                             onClick={toggleTheme}
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${isDark
-                                ? 'bg-white/5 border border-white/10 text-amber-400 hover:bg-white/10'
-                                : 'bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200'
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 border border-[#C5A059] shadow-sm ${isDark
+                                ? 'bg-[#C5A059]/5 text-amber-400 hover:bg-[#C5A059]/10'
+                                : 'bg-[#C5A059]/5 text-[#C5A059] hover:bg-[#C5A059]/10'
                                 }`}
                             aria-label="Toggle theme"
                         >
@@ -93,7 +101,7 @@ export default function Navbar() {
                     {/* Mobile: Theme Toggle + Hamburger Menu Toggle */}
                     {/* Tampilkan fleksibel di layar HP, sembunyikan ('md:hidden') saat masuk ukuran tablet/desktop */}
                     <div className="md:hidden flex items-center gap-2">
-                        <button onClick={toggleTheme} className={`p-2 rounded-lg ${isDark ? 'text-amber-400' : 'text-slate-500'}`}>
+                        <button onClick={toggleTheme} className={`p-2 rounded-lg border border-[#C5A059] ${isDark ? 'text-amber-400 bg-[#C5A059]/5' : 'text-[#C5A059] bg-[#C5A059]/5'}`}>
                             {isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
                         </button>
                         <button
@@ -107,27 +115,32 @@ export default function Navbar() {
 
                 {/* Mobile Menu Overlay */}
                 {/* Hanya dirender jika isMobileMenuOpen true. Disembunyikan oleh 'md:hidden' jika layar membesar */}
-                {isMobileMenuOpen && (
-                    <div className={`md:hidden pt-4 pb-2 space-y-2 border-t mt-4 px-4 rounded-xl shadow-2xl ${isDark
-                        ? 'border-white/10 bg-[#0B0F19]/95 backdrop-blur-3xl'
-                        : 'border-black/5 bg-white/95 backdrop-blur-3xl'
-                        }`}>
-                        {navLinks.map((link) => (
-                            <Link
-                                key={link.label}
-                                href={link.href}
-                                className={`block px-4 py-2 text-sm font-bold rounded-lg ${isDark
-                                    ? 'text-gray-300 hover:text-[#AF955B] hover:bg-[#AF955B]/5'
-                                    : 'text-slate-900 hover:text-[#AF955B] hover:bg-[#AF955B]/5'
-                                    }`}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                                {link.label}
-                            </Link>
-                        ))}
-                    </div>
-                )}
-            </nav>
-        </div>
+                {
+                    isMobileMenuOpen && (
+                        <div className={`md:hidden pt-4 pb-2 space-y-2 border-t mt-4 px-4 rounded-xl shadow-2xl ${isDark
+                            ? 'border-white/10 bg-[#0B0F19]/95 backdrop-blur-3xl'
+                            : 'border-black/5 bg-white/95 backdrop-blur-3xl'
+                            }`}>
+                            {navLinks.map((link) => (
+                                <Link
+                                    key={link.label}
+                                    href={link.href}
+                                    onClick={(e) => {
+                                        handleNavLinkClick(e, link.href);
+                                        setIsMobileMenuOpen(false);
+                                    }}
+                                    className={`block px-4 py-2 text-sm font-bold rounded-lg ${isDark
+                                        ? 'text-gray-300 hover:text-[#AF955B] hover:bg-[#AF955B]/5'
+                                        : 'text-slate-900 hover:text-[#AF955B] hover:bg-[#AF955B]/5'
+                                        }`}
+                                >
+                                    {link.label}
+                                </Link>
+                            ))}
+                        </div>
+                    )
+                }
+            </nav >
+        </div >
     );
 }

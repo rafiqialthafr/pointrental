@@ -245,8 +245,8 @@ export default function Contact() {
                             {/* Map */}
                             <div className="relative rounded-2xl overflow-hidden shadow-xl border h-44" style={{ borderColor: 'var(--theme-border)' }}>
                                 <iframe
-                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322283!2d106.8195613507536!3d-6.194741395493371!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f5d2e764b12d%3A0x3d2ad6e1e0e9bcc8!2sJl.%20Jend.%20Sudirman%2C%20Jakarta!5e0!3m2!1sen!2sid!4v1700000000000!5m2!1sen!2sid"
-                                    className="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-700"
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.4898844702943!2d106.7562153739939!3d-6.585863293407734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69c5457e0e3bcf%3A0x58481d58737539c0!2sSMK%20Negeri%201%20Ciomas!5e0!3m2!1sid!2sid!4v1782621767795!5m2!1sid!2sid"
+                                    className="w-full h-full border-0 transition-all duration-700"
                                     allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade"
                                 />
                                 <div className="absolute bottom-3 left-3 right-3">
@@ -325,8 +325,6 @@ export default function Contact() {
                     </div>
                 </div>
             </section>
-
-            {/* ═══ CTA Dihapus ═══ */}
 
             <Footer />
         </main>

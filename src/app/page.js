@@ -72,17 +72,17 @@ export default function Home() {
                 <img
                   src="https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?q=80&w=2069&auto=format&fit=crop"
                   alt="Mobil Hitam Mewah PointRental"
-                  className="w-full aspect-[3/4] md:aspect-[16/9] object-cover object-center hover:scale-105 transition-transform duration-1000"
+                  className="w-full aspect-[3/4] md:aspect-[16/9] lg:aspect-[4/3] object-cover object-center hover:scale-105 transition-transform duration-1000"
                 />
               </div>
-              {/* Badge — selalu di bawah foto, tampil di semua ukuran layar */}
-              <div className="mt-5">
-                <div className={`inline-flex items-center gap-4 p-4 rounded-2xl shadow-lg ${isDark ? 'bg-[#131825]/80 border border-white/5' : 'bg-white border border-slate-200'}`}>
+              {/* Badge — di bawah foto di mobile, di dalam foto (kiri bawah) di laptop ke atas (lg:) */}
+              <div className="mt-5 lg:mt-0 lg:absolute lg:bottom-8 lg:left-8 lg:z-20">
+                <div className={`inline-flex items-center gap-4 p-4 rounded-2xl shadow-xl ${isDark ? 'bg-[#131825]/90 backdrop-blur-md border border-white/15' : 'bg-white/90 backdrop-blur-md border border-slate-200'}`}>
                   <div className="w-12 h-12 bg-gradient-to-br from-[#E8C872] to-[#8B6914] rounded-xl flex items-center justify-center shadow-md shrink-0">
                     <Star className="w-6 h-6 text-white fill-white" />
                   </div>
                   <div>
-                    <p className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Layanan 5 Bintang</p>
+                    <p className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Layanan 10 Bintang</p>
                     <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>Peringkat Utama Google Business</p>
                   </div>
                 </div>
@@ -136,7 +136,7 @@ export default function Home() {
       </section>
 
       {/* ═══ HIGHLIGHT ARMADA ═══ */}
-      <section className="pb-12 pt-8 px-6" style={{ background: 'var(--theme-bg)' }}>
+      <section className="py-20 px-6" style={{ background: 'var(--theme-bg)' }}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <h2 className={`text-3xl font-semibold mb-4 tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>Koleksi Terpilih</h2>
@@ -204,26 +204,6 @@ export default function Home() {
             {testimonials.map((t, i) => (
               <TestimonialCard key={i} testimonial={t} />
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ CTA SECTION ═══ */}
-      <section className="py-24 px-6 relative overflow-hidden" style={{ background: 'var(--theme-bg)' }}>
-        <div className={`max-w-6xl mx-auto rounded-[3rem] p-12 md:p-20 relative overflow-hidden text-center ${isDark ? 'bg-slate-900 border border-white/5' : 'bg-slate-900'}`}>
-          <div className="absolute top-0 right-0 w-80 h-80 bg-[#AF955B]/20 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/10 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2"></div>
-          <div className="relative z-10 space-y-8 max-w-3xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">Siap Untuk Perjalanan <span className="text-gold-premium">Eksklusif</span> Anda?</h2>
-            <p className="text-xl text-gray-400">Hubungi kami sekarang dan temukan armada terbaik yang sesuai dengan gaya hidup prestisius Anda.</p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4">
-              <Link href="/katalog" className="px-10 py-5 bg-[#C5A059] text-white font-bold rounded-full hover:bg-[#B38D46] shadow-xl shadow-[#C5A059]/20 transition-all flex items-center gap-3 w-full sm:w-auto justify-center group active:scale-95">
-                Lihat Katalog <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link href="/kontak" className="px-10 py-5 border border-white/20 text-white font-bold rounded-full hover:bg-white/5 transition-all w-full sm:w-auto text-center active:scale-95">
-                Hubungi Kami
-              </Link>
-            </div>
           </div>
         </div>
       </section>

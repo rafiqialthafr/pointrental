@@ -13,9 +13,9 @@ const playfair = Playfair_Display({
 });
 
 export const metadata = {
-  title: 'PointRental — Sewa Mobil Premium & Terpercaya',
+  title: 'PointRental - Sewa Mobil Premium & Terpercaya',
   description: 'Platform rental mobil modern, profesional, dan terpercaya. Nikmati armada premium dengan layanan terbaik di kelasnya.',
-  keywords: ['rental mobil', 'sewa mobil', 'car rental', 'mobil premium', 'PointRental'],
+  keywords: ['rental mobil', 'sewa mobil', 'car rental', 'mobil premium', 'PointRental']
 };
 
 export default function RootLayout({ children }) {

@@ -10,9 +10,7 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="lg:col-span-1">
                         <Link href="/" className="inline-flex items-center gap-2.5 mb-6 group">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E8C872] to-[#8B6914] flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
-                                <Car className="w-6 h-6 text-white" />
-                            </div>
+                            <img src="favicon.ico" alt="Logo" className="w-10 h-10" />
                             <span className="text-xl font-bold tracking-tight">
                                 Point<span className="text-[#C5A059]">Rental</span>
                             </span>
@@ -24,7 +22,7 @@ export default function Footer() {
 
                     {/* Navigasi */}
                     <div>
-                        <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Halaman</h4>
+                        <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">NAVIGASI</h4>
                         <ul className="space-y-3">
                             {[
                                 { name: 'Beranda', href: '/' },
@@ -57,7 +55,7 @@ export default function Footer() {
                         <ul className="space-y-4">
                             <li className="flex items-start gap-4 text-sm font-medium text-gray-400">
                                 <MapPin className="w-5 h-5 text-[#C5A059] mt-0.5 flex-shrink-0" />
-                                <span>Menara Prestige, SCBD<br />Jakarta Selatan</span>
+                                <span>Menara Puchinok, Bermuda<br />Bogor, Jawa Barat</span>
                             </li>
                             <li className="flex items-center gap-4 text-sm font-medium text-gray-400">
                                 <Phone className="w-5 h-5 text-[#C5A059] flex-shrink-0" />
@@ -65,7 +63,7 @@ export default function Footer() {
                             </li>
                             <li className="flex items-center gap-4 text-sm font-medium text-gray-400">
                                 <Mail className="w-5 h-5 text-[#C5A059] flex-shrink-0" />
-                                <a href="mailto:vip@pointrental.id" className="hover:text-[#C5A059] transition-colors">vip@pointrental.id</a>
+                                <a href="mailto:vip@pointrental.com" className="hover:text-[#C5A059] transition-colors">vip@pointrental.com</a>
                             </li>
                         </ul>
                     </div>
