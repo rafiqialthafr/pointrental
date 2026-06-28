@@ -25,12 +25,12 @@ export default function Home() {
       <Navbar />
 
       {/* ═══ HERO ═══ */}
-      <section className="relative min-h-[100dvh] w-full flex flex-col overflow-hidden" style={{ background: 'var(--theme-bg)' }}>
+      <section className="relative min-h-[100svh] w-full flex flex-col overflow-hidden" style={{ background: 'var(--theme-bg)' }}>
 
         {/* Teks konten */}
         <div className="relative z-20 max-w-6xl mx-auto px-6 md:px-4 pt-34 pb-8 md:py-0 w-full flex-1 flex flex-col md:justify-center">
           <div className="max-w-xl space-y-4 md:space-y-6">
-            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <h1 className={`text-5xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Elegansi<br />
               <span className="text-gold-premium">Berkendara</span>
             </h1>
@@ -49,7 +49,7 @@ export default function Home() {
 
         {/* Gambar mobil — Layer z-10, h-[55%] untuk mempertahankan rasio mobilnya dengan mask smooth */}
         <div className="absolute inset-0 z-10 pointer-events-none select-none overflow-hidden">
-          <div className={`absolute bottom-0 lg:inset-y-0 right-0 w-full lg:w-[75vw] h-[55%] lg:h-full overflow-hidden transition-all duration-700 ${isDark ? 'opacity-70 lg:opacity-90' : 'opacity-100'}`}>
+          <div className={`absolute bottom-0 lg:inset-y-0 right-0 w-full lg:w-[75vw] h-[55%] lg:h-full overflow-hidden transition-opacity duration-700 ${isDark ? 'opacity-70 lg:opacity-90' : 'opacity-100'}`}>
             <img
               src="https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=2400&auto=format&fit=crop"
               alt="Mobil Sport Mewah"
