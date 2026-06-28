@@ -25,38 +25,43 @@ export default function Home() {
       <Navbar />
 
       {/* ═══ HERO ═══ */}
-      <section className="relative h-screen w-full overflow-hidden" style={{ background: 'var(--theme-bg)' }}>
-        {/* Teks konten — layout flex-col agar teks di atas, button sebelum area mobil */}
-        <div className="max-w-6xl mx-auto px-6 md:px-4 pt-20 md:pt-0 pb-0 md:py-0 w-full relative z-20 h-full flex flex-col md:justify-center">
-          {/* Area teks: di mobile sisakan ruang 50% bawah untuk gambar mobil */}
-          <div className="flex flex-col h-full md:h-auto md:block">
-            <div className="max-w-xl space-y-4 md:space-y-6 pt-4 md:pt-0">
-              <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                Elegansi<br />
-                <span className="text-gold-premium">Berkendara</span>
-              </h1>
-              <p className={`text-base md:text-xl font-medium leading-relaxed max-w-sm ${isDark ? 'text-gray-400' : 'text-slate-800'}`}>
-                Standar baru dalam pelayanan penyewaan mobil mewah untuk perjalanan eksklusif Anda.
-              </p>
-            </div>
-            {/* Button: mt-auto mendorong ke bawah teks, mb-[52%] memberi jarak dari area gambar mobil */}
-            <div className="mt-auto mb-[52%] md:mb-0 md:mt-8 flex items-center w-full md:w-auto">
-              <Link href="/katalog" className="px-8 py-4 md:px-10 md:py-5 bg-[#C5A059] text-white font-bold rounded-full hover:bg-[#B38D46] shadow-xl shadow-[#C5A059]/10 transition-all flex items-center gap-3 active:scale-95 group w-full md:w-auto justify-center md:justify-start border border-[#C5A059]/50">
-                Reservasi Eksklusif <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
+      <section className="relative min-h-[100dvh] w-full flex flex-col md:block overflow-hidden" style={{ background: 'var(--theme-bg)' }}>
+
+        {/* Teks konten */}
+        <div className="max-w-6xl mx-auto px-6 md:px-4 pt-28 sm:pt-32 w-full relative z-20 md:h-full md:flex md:flex-col md:justify-center shrink-0">
+          <div className="max-w-xl space-y-6">
+            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              Elegansi<br />
+              <span className="text-gold-premium">Berkendara</span>
+            </h1>
+            <p className={`text-lg md:text-xl font-medium leading-relaxed max-w-sm ${isDark ? 'text-gray-400' : 'text-slate-800'}`}>
+              Standar baru dalam pelayanan penyewaan mobil mewah untuk perjalanan eksklusif Anda.
+            </p>
+          </div>
+          {/* Button Desktop */}
+          <div className="hidden md:flex items-center mt-8 w-full md:w-auto">
+            <Link href="/katalog" className="px-10 py-5 bg-[#C5A059] text-white font-bold rounded-full hover:bg-[#B38D46] shadow-xl shadow-[#C5A059]/30 transition-all flex items-center gap-3 active:scale-95 group w-full justify-center md:justify-start border border-[#C5A059]/50">
+              Reservasi Eksklusif <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
         </div>
 
-        {/* Gambar mobil — h-[50%] di mobile (bawah), full height di desktop (kanan) */}
-        <div className="absolute inset-0 z-10 pointer-events-none select-none overflow-hidden">
-          <div className={`absolute bottom-0 lg:inset-y-0 right-0 w-full lg:w-[75vw] h-[50%] lg:h-full overflow-hidden transition-all duration-700 ${isDark ? 'opacity-70 lg:opacity-90' : 'opacity-100'}`}>
+        {/* Gambar Mobil (Mobile & Desktop) */}
+        <div className="flex-1 w-full relative z-10 md:absolute md:inset-0 pointer-events-none select-none flex items-end">
+          <div className={`absolute bottom-0 right-0 w-full h-[120%] md:h-full lg:w-[75vw] transition-all duration-700 ${isDark ? 'opacity-70 lg:opacity-90' : 'opacity-100'}`}>
             <img
               src="https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=2400&auto=format&fit=crop"
               alt="Mobil Sport Mewah"
-              className={`w-full h-full object-cover lg:object-[70%_center] saturate-[1.2] ${isDark ? 'contrast-100' : 'contrast-[1.15] brightness-[0.95]'} [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_5%,black_100%)] lg:[mask-image:linear-gradient(to_right,transparent_0%,black_50%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,transparent_5%,black_100%)] lg:[-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_50%)]`}
+              className={`w-full h-full object-cover object-bottom lg:object-[70%_center] saturate-[1.2] ${isDark ? 'contrast-100' : 'contrast-[1.15] brightness-[0.95]'} [mask-image:linear-gradient(to_bottom,transparent_0%,black_40%,black_100%)] lg:[mask-image:linear-gradient(to_right,transparent_0%,black_50%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_40%,black_100%)] lg:[-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_50%)]`}
             />
           </div>
+        </div>
+
+        {/* Button Mobile */}
+        <div className="w-full px-6 pb-6 pt-2 shrink-0 md:hidden relative z-20">
+          <Link href="/katalog" className="w-full px-10 py-4 sm:py-5 bg-[#C5A059] text-white font-bold rounded-full hover:bg-[#B38D46] shadow-xl shadow-[#C5A059]/30 transition-all flex items-center justify-center gap-3 active:scale-95 group border border-[#C5A059]/50">
+            Reservasi Eksklusif <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </section>
 
