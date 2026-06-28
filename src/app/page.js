@@ -28,14 +28,14 @@ export default function Home() {
       <section className="relative min-h-[100dvh] w-full flex flex-col overflow-hidden" style={{ background: 'var(--theme-bg)' }}>
 
         {/* Teks konten */}
-        <div className="relative z-20 max-w-6xl mx-auto px-6 md:px-4 pt-40 pb-8 md:py-0 w-full flex-1 flex flex-col md:justify-center">
+        <div className="relative z-20 max-w-6xl mx-auto px-6 md:px-4 pt-34 pb-8 md:py-0 w-full flex-1 flex flex-col md:justify-center">
           <div className="max-w-xl space-y-4 md:space-y-6">
             <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Elegansi<br />
               <span className="text-gold-premium">Berkendara</span>
             </h1>
-            <p className={`text-base md:text-xl font-medium leading-relaxed max-w-sm ${isDark ? 'text-gray-400' : 'text-slate-800'}`}>
-              Standar baru dalam pelayanan penyewaan mobil mewah untuk perjalanan eksklusif Anda.
+            <p className={`text-base md:text-xl font-medium leading-relaxed md:max-w-sm ${isDark ? 'text-gray-400' : 'text-slate-800'}`}>
+              Standar baru dalam pelayanan <br className="block md:hidden" />penyewaan mobil mewah untuk <br className="block md:hidden" />perjalanan eksklusif Anda.
             </p>
           </div>
 
