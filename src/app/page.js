@@ -35,7 +35,7 @@ export default function Home() {
 
           {/* Button: mt-auto memastikan tombol akan diam di paling bawah (dikunci di dasar kontainer) di mobile */}
           <div className="mt-auto md:mt-8 flex items-center w-full md:w-auto relative z-30">
-            <Link href="/katalog" className="px-10 py-4 md:py-5 bg-[#C5A059] text-white font-bold rounded-full hover:bg-[#B38D46] shadow-xl shadow-[#C5A059]/30 transition-all flex items-center gap-3 active:scale-95 group w-full md:w-auto justify-center md:justify-start border border-[#C5A059]/50">
+            <Link href="/armada" className="px-10 py-4 md:py-5 bg-[#C5A059] text-white font-bold rounded-full hover:bg-[#B38D46] shadow-xl shadow-[#C5A059]/30 transition-all flex items-center gap-3 active:scale-95 group w-full md:w-auto justify-center md:justify-start border border-[#C5A059]/50">
               Reservasi Eksklusif <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>

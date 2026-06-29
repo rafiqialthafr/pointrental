@@ -91,7 +91,7 @@ export default function Navbar() {
                         </button>
 
                         <Link
-                            href="/katalog"
+                            href="/armada"
                             className="px-5 py-2.5 bg-gradient-to-r from-[#C5A059] to-[#AF955B] text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-[#C5A059]/20 hover:-translate-y-0.5 transition-all active:scale-[0.98]"
                         >
                             Reservasi Eksklusif
