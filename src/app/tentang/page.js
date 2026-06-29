@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Award, ShieldCheck, Users, MapPin, Sparkles, Target, Eye, Star, ArrowRight, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import { useTheme } from '@/components/ThemeContext';
 
 function useCountUp(end, duration = 2000) {
     const [count, setCount] = useState(0);
@@ -24,22 +25,12 @@ function useCountUp(end, duration = 2000) {
 }
 
 export default function About() {
-    const [isMounted, setIsMounted] = useState(false);
-    const [isDark, setIsDark] = useState(true);
+    const { isLight } = useTheme();
+    const isDark = !isLight;
     const s1 = useCountUp(8, 1500);
     const s2 = useCountUp(500, 2000);
     const s3 = useCountUp(50, 1800);
     const s4 = useCountUp(15, 1600);
-
-    useEffect(() => {
-        setIsMounted(true);
-        const check = () => setIsDark(document.documentElement.getAttribute('data-theme') !== 'light');
-        check();
-        const observer = new MutationObserver(check);
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-        return () => observer.disconnect();
-    }, []);
-    if (!isMounted) return null;
 
     return (
         <main className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-text)' }}>
@@ -48,7 +39,7 @@ export default function About() {
             {/* ═══ PAGE HEADER ═══ */}
             <section className="relative pt-24 pb-16 h-[50vh] min-h-[400px] max-h-[550px] overflow-hidden flex items-center">
                 <div className="absolute inset-0">
-                    <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=2400&auto=format&fit=crop" alt="Perjalanan Mewah PointRental" className="w-full h-full object-cover object-center" />
+                    <img src="/page-header.jpg" alt="Armada Premium PointRental" className="w-full h-full object-cover object-center" />
                     <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-r from-[#0B0F19] via-[#0B0F19]/70 to-transparent' : 'bg-gradient-to-r from-black/80 via-black/40 to-transparent'}`} />
                 </div>
 

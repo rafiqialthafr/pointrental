@@ -3,16 +3,17 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
-export function ThemeProvider({ children }) {
-    // State ini akan reset jadi 'false' (Dark Mode) setiap kali user Refresh (F5).
-    // Tapi akan tetap bertahan walau user pindah halaman via Navbar, karena layout.js tidak unmount.
-    const [isLight, setIsLight] = useState(false);
+export function ThemeProvider({ children, initialTheme }) {
+    // Theme default ditentukan dari layout server, bukan di klien. Mencegah hydration error sepenuhnya!
+    const [isLight, setIsLight] = useState(initialTheme === 'light');
 
     useEffect(() => {
         if (isLight) {
             document.documentElement.setAttribute('data-theme', 'light');
+            document.cookie = "theme=light; path=/; max-age=31536000"; // simpan 1 tahun
         } else {
             document.documentElement.removeAttribute('data-theme');
+            document.cookie = "theme=dark; path=/; max-age=31536000";
         }
     }, [isLight]);
 

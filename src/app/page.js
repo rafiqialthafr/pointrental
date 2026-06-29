@@ -7,18 +7,12 @@ import CarCard from "@/components/CarCard";
 import TestimonialCard from "@/components/TestimonialCard";
 import { Star, ShieldCheck, Clock, Zap, ArrowRight, ChevronRight, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import { useTheme } from '@/components/ThemeContext';
 
 export default function Home() {
   const featuredCars = cars.filter(car => car.rating >= 4.9).slice(0, 3);
-  const [isDark, setIsDark] = useState(true);
-
-  useEffect(() => {
-    const check = () => setIsDark(document.documentElement.getAttribute('data-theme') !== 'light');
-    check();
-    const observer = new MutationObserver(check);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    return () => observer.disconnect();
-  }, []);
+  const { isLight } = useTheme();
+  const isDark = !isLight;
 
   return (
     <main className="min-h-screen overflow-x-hidden" style={{ background: 'var(--theme-bg)', color: 'var(--theme-text)' }}>
@@ -51,7 +45,8 @@ export default function Home() {
         <div className="absolute inset-0 z-10 pointer-events-none select-none overflow-hidden">
           <div className={`absolute bottom-0 lg:inset-y-0 right-0 w-full lg:w-[75vw] h-[55%] lg:h-full overflow-hidden transition-opacity duration-700 ${isDark ? 'opacity-70 lg:opacity-90' : 'opacity-100'}`}>
             <img
-              src="https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=2400&auto=format&fit=crop"
+              fetchPriority="high"
+              src="/hero-car.jpg"
               alt="Mobil Sport Mewah"
               className={`w-full h-full object-cover lg:object-[70%_center] saturate-[1.2] ${isDark ? 'contrast-100' : 'contrast-[1.15] brightness-[0.95]'} [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_10%,black_100%)] lg:[mask-image:linear-gradient(to_right,transparent_0%,black_50%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,transparent_10%,black_100%)] lg:[-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_50%)]`}
             />
@@ -72,7 +67,7 @@ export default function Home() {
                 <img
                   src="https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?q=80&w=2069&auto=format&fit=crop"
                   alt="Mobil Hitam Mewah PointRental"
-                  className="w-full aspect-[3/4] md:aspect-[16/9] lg:aspect-[4/3] object-cover object-center hover:scale-105 transition-transform duration-1000"
+                  className="w-full aspect-[4/3] md:aspect-[16/9] lg:aspect-[4/3] object-cover object-center hover:scale-105 transition-transform duration-1000"
                 />
               </div>
               {/* Badge — di bawah foto di mobile, di dalam foto (kiri bawah) di laptop ke atas (lg:) */}
@@ -149,7 +144,7 @@ export default function Home() {
             ))}
           </div>
           <div className="flex justify-center mt-12">
-            <Link href="/katalog" className="px-6 py-4 bg-[#AF955B] text-white font-medium rounded-full hover:bg-[#8E7948] shadow-2xl shadow-[#AF955B]/20 transition-all flex items-center gap-3 active:scale-95 group">
+            <Link href="/armada" className="px-6 py-4 bg-[#AF955B] text-white font-medium rounded-full hover:bg-[#8E7948] shadow-2xl shadow-[#AF955B]/20 transition-all flex items-center gap-3 active:scale-95 group">
               Jelajahi Semua Armada <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>

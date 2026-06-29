@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Phone, Mail, MapPin, Clock, Send, MessageCircle, Headphones, Shield, ArrowRight, Sparkles, Globe, Star } from 'lucide-react';
 import Link from 'next/link';
+import { useTheme } from '@/components/ThemeContext';
 import { useState, useEffect, useRef } from 'react';
 
 function useCountUp(end, duration = 2000) {
@@ -34,22 +35,13 @@ function useCountUp(end, duration = 2000) {
 export default function Contact() {
     const [formData, setFormData] = useState({ name: '', phone: '', subject: '', message: '' });
     const [formSubmitted, setFormSubmitted] = useState(false);
-    const [isMounted, setIsMounted] = useState(false);
-    const [isDark, setIsDark] = useState(true);
+    const { isLight } = useTheme();
+    const isDark = !isLight;
 
     const stats1 = useCountUp(500, 2000);
     const stats2 = useCountUp(24, 1500);
     const stats3 = useCountUp(98, 2000);
     const stats4 = useCountUp(15, 1800);
-
-    useEffect(() => {
-        setIsMounted(true);
-        const check = () => setIsDark(document.documentElement.getAttribute('data-theme') !== 'light');
-        check();
-        const observer = new MutationObserver(check);
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-        return () => observer.disconnect();
-    }, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -66,8 +58,6 @@ export default function Contact() {
         }, 3000);
     };
 
-    if (!isMounted) return null;
-
     return (
         <main className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-text)' }}>
             <Navbar />
@@ -77,8 +67,8 @@ export default function Contact() {
                 {/* Background Image */}
                 <div className="absolute inset-0">
                     <img
-                        src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=2400&auto=format&fit=crop"
-                        alt="Luxury Car Interior"
+                        src="/page-header.jpg"
+                        alt="Armada Premium PointRental"
                         className="w-full h-full object-cover object-center"
                     />
                     {/* Overlay Dinamis - Otomatis menyesuaikan Light Theme agar foto tidak ditelan kabut hitam */}

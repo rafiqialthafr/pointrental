@@ -5,23 +5,15 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CarCard from "@/components/CarCard";
 import { Filter, Search, SlidersHorizontal, Car, ChevronDown } from 'lucide-react';
+import { useTheme } from '@/components/ThemeContext';
 
 export default function Catalog() {
     const [searchTerm, setSearchTerm] = useState('');
     const [typeFilter, setTypeFilter] = useState('Semua');
     const [brandFilter, setBrandFilter] = useState('Semua');
-    const [isMounted, setIsMounted] = useState(false);
     const [showMobileFilter, setShowMobileFilter] = useState(false);
-    const [isDark, setIsDark] = useState(true);
-
-    useEffect(() => {
-        setIsMounted(true);
-        const check = () => setIsDark(document.documentElement.getAttribute('data-theme') !== 'light');
-        check();
-        const observer = new MutationObserver(check);
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-        return () => observer.disconnect();
-    }, []);
+    const { isLight } = useTheme();
+    const isDark = !isLight;
 
     const uniqueBrands = ['Semua', ...new Set(cars.map(c => c.brand))];
     const uniqueTypes = ['Semua', ...new Set(cars.map(c => c.type))];
@@ -45,8 +37,6 @@ export default function Catalog() {
     });
     const activeFilters = (typeFilter !== 'Semua' ? 1 : 0) + (brandFilter !== 'Semua' ? 1 : 0) + (searchTerm ? 1 : 0);
 
-    if (!isMounted) return null;
-
     return (
         <main className="min-h-screen flex flex-col" style={{ background: 'var(--theme-bg)', color: 'var(--theme-text)' }}>
             <Navbar />
@@ -54,7 +44,7 @@ export default function Catalog() {
             {/* ═══ PAGE HEADER ═══ */}
             <section className="relative pt-24 pb-16 h-[50vh] min-h-[400px] max-h-[550px] overflow-hidden flex items-center">
                 <div className="absolute inset-0">
-                    <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=2400&auto=format&fit=crop" alt="Armada Premium PointRental" className="w-full h-full object-cover object-center" />
+                    <img src="/page-header.jpg" alt="Armada Premium PointRental" className="w-full h-full object-cover object-center" />
                     <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-r from-[#0B0F19] via-[#0B0F19]/70 to-transparent' : 'bg-gradient-to-r from-black/80 via-black/40 to-transparent'}`} />
                 </div>
 

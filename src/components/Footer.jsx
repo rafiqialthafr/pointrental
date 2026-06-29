@@ -75,13 +75,13 @@ export default function Footer() {
 
                     {/* Social Media Icons */}
                     <div className="flex items-center gap-5">
-                        <Link href="#" aria-label="Facebook" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
+                        <Link target="_blank" href="https://www.facebook.com/" aria-label="Facebook" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
                             <FacebookIcon className="w-4 h-4" />
                         </Link>
-                        <Link href="#" aria-label="Instagram" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
+                        <Link target="_blank" href="https://www.instagram.com/" aria-label="Instagram" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
                             <InstagramIcon className="w-4 h-4" />
                         </Link>
-                        <Link href="#" aria-label="TikTok" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
+                        <Link target="_blank" href="https://www.tiktok.com/" aria-label="TikTok" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
                             <TikTokIcon className="w-4 h-4" />
                         </Link>
                     </div>

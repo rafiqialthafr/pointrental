@@ -31,7 +31,7 @@ export default function Navbar() {
 
     const navLinks = [
         { label: 'Beranda', href: '/' },
-        { label: 'Katalog', href: '/katalog' },
+        { label: 'Armada', href: '/armada' },
         { label: 'Tentang', href: '/tentang' },
         { label: 'Kontak', href: '/kontak' },
     ];
