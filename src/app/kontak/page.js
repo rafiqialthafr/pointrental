@@ -306,7 +306,7 @@ export default function Contact() {
                         {[
                             { q: 'Bagaimana cara melakukan reservasi mobil?', a: 'Anda dapat melakukan reservasi melalui website kami, WhatsApp, atau menghubungi hotline VIP. Tim kami akan membantu memilih armada terbaik sesuai kebutuhan Anda.' },
                             { q: 'Apakah tersedia layanan antar-jemput?', a: 'Ya, kami menyediakan layanan antar-jemput gratis di area Jabodetabek.' },
-                            { q: 'Berapa minimum durasi sewa?', a: 'Minimum durasi sewa adalah 12 jam. Kami juga menyediakan paket harian, mingguan, dan bulanan.' },
+                            { q: 'Berapa minimum durasi sewa?', a: 'Minimum durasi sewa adalah 24 jam. Kami juga menyediakan paket harian, mingguan, dan bulanan.' },
                             { q: 'Apakah mobil sudah termasuk asuransi?', a: 'Seluruh armada kami telah dilengkapi asuransi komprehensif (all-risk).' },
                             { q: 'Bagaimana kebijakan pembatalan?', a: 'Pembatalan H-24 tanpa biaya. Kurang dari 24 jam dikenakan biaya administrasi 20%.' },
                         ].map((faq, i) => (

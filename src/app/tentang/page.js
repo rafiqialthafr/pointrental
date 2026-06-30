@@ -29,7 +29,7 @@ export default function About() {
     const isDark = !isLight;
     const s1 = useCountUp(8, 1500);
     const s2 = useCountUp(500, 2000);
-    const s3 = useCountUp(50, 1800);
+    const s3 = useCountUp(6, 1400);
     const s4 = useCountUp(15, 1600);
 
     return (

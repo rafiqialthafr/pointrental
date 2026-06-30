@@ -10,7 +10,7 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="lg:col-span-1">
                         <Link href="/" className="inline-flex items-center gap-2.5 mb-6 group">
-                            <img src="favicon.ico" alt="Logo" className="w-10 h-10" />
+                            <img src="/favicon.ico" alt="Logo" className="w-10 h-10" />
                             <span className="text-xl font-bold tracking-tight">
                                 Point<span className="text-[#C5A059]">Rental</span>
                             </span>
@@ -41,9 +41,14 @@ export default function Footer() {
                     <div>
                         <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Layanan</h4>
                         <ul className="space-y-3">
-                            {['Sewa Harian', 'Sewa Mingguan', 'Antar Jemput VIP', 'Wedding Car'].map(item => (
-                                <li key={item}>
-                                    <Link href="#" className="text-sm text-gray-400 font-medium hover:text-[#C5A059] transition-colors">{item}</Link>
+                            {[
+                                { name: 'Sewa Harian', href: '/armada' },
+                                { name: 'Sewa Mingguan', href: '/armada' },
+                                { name: 'Sewa Bulanan', href: '/armada' },
+                                { name: 'Layanan Driver', href: '/armada' }
+                            ].map(item => (
+                                <li key={item.name}>
+                                    <Link href={item.href} className="text-sm text-gray-400 font-medium hover:text-[#C5A059] transition-colors">{item.name}</Link>
                                 </li>
                             ))}
                         </ul>

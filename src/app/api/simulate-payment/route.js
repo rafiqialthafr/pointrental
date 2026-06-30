@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
 /**
  * API Endpoint: Auto-simulate payment di Midtrans Sandbox
@@ -38,8 +39,12 @@ export async function POST(request) {
         const statusData = await statusRes.json();
         console.log('[Simulate] Transaction status:', JSON.stringify(statusData, null, 2));
 
-        // Kalau sudah settlement, ga perlu simulate lagi
+        // Kalau sudah settlement, ga perlu simulate lagi, langsung paksa Supabase UPDATE ke PAID
         if (statusData.transaction_status === 'settlement' || statusData.transaction_status === 'capture') {
+            await supabase
+                .from('bookings')
+                .update({ status: 'PAID', updatedAt: new Date().toISOString() })
+                .eq('midtransOrderId', orderId);
             return NextResponse.json({ success: true, message: 'Already settled', status: statusData.transaction_status });
         }
 
@@ -85,6 +90,18 @@ export async function POST(request) {
                 message: `Payment type "${paymentType}" — simulation not supported. Use Credit Card for instant success.`,
                 transactionData: statusData
             });
+        }
+
+        // Simulate berhasil - UPDATE SUPABASE LANGSUNG KARENA WEBHOOK GA BISA NGEHIT LOCALHOST
+        if (simulateResult.success) {
+            await supabase
+                .from('bookings')
+                .update({
+                    status: 'PAID',
+                    updatedAt: new Date().toISOString()
+                })
+                .eq('midtransOrderId', orderId);
+            console.log(`[Simulate] Berhasil auto-update status ${orderId} ke PAID di Supabase`);
         }
 
         return NextResponse.json({

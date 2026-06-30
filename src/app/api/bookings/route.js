@@ -24,7 +24,7 @@ export async function POST(req) {
         const newBooking = {
             id: `INV-${Date.now()}`,
             ...body,
-            status: 'PAID',
+            status: 'PENDING_PAYMENT',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };

@@ -18,13 +18,14 @@ import {
     CreditCard as CardIcon,
     CheckCircle2,
     Lock,
+    Hourglass,
     ArrowRight,
     Loader2,
     QrCode,
     MessageSquare,
     Send
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/components/ThemeContext';
 import Link from 'next/link';
 
@@ -38,6 +39,29 @@ export default function CarDetail() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [snapReady, setSnapReady] = useState(false);
     const [successData, setSuccessData] = useState(null);
+    const pollingRef = React.useRef(null);
+
+    // Cleanup polling saat komponen di-unmount
+    React.useEffect(() => {
+        return () => { if (pollingRef.current) clearInterval(pollingRef.current); };
+    }, []);
+
+    // Polling setiap 5 detik untuk cek apakah pembayaran sudah settlement
+    const startPolling = (orderId, bookingId) => {
+        if (pollingRef.current) clearInterval(pollingRef.current);
+        pollingRef.current = setInterval(async () => {
+            try {
+                const res = await fetch(`/api/booking-status?orderId=${orderId}`);
+                const data = await res.json();
+                if (data.status === 'PAID') {
+                    clearInterval(pollingRef.current);
+                    setSuccessData({ bookingId, orderId, status: 'paid' });
+                }
+            } catch (e) {
+                console.error('[Polling] Gagal cek status:', e);
+            }
+        }, 5000);
+    };
 
     // Rating states
     const [ratingsData, setRatingsData] = useState({ average: 0, total: 0, ratings: [] });
@@ -191,6 +215,8 @@ export default function CarDetail() {
             if (window.snap) {
                 window.snap.pay(snapData.token, {
                     onSuccess: async (result) => {
+                        // Bayar langsung (kartu kredit / beberapa metode instan)
+                        if (pollingRef.current) clearInterval(pollingRef.current);
                         let fPay = result.payment_type || 'MIDTRANS';
                         if (fPay === 'bank_transfer') {
                             const bank = result.va_numbers?.[0]?.bank || 'BANK';
@@ -207,6 +233,7 @@ export default function CarDetail() {
                         setBookingStep(2);
                     },
                     onPending: async (result) => {
+                        // VA / QRIS / e-wallet → tampilkan pending, lalu polling hingga webhook update
                         let fPay = result.payment_type || 'MIDTRANS';
                         if (fPay === 'bank_transfer') {
                             const bank = result.va_numbers?.[0]?.bank || 'BANK';
@@ -219,8 +246,19 @@ export default function CarDetail() {
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ status: 'PENDING_PAYMENT', midtransOrderId: snapData.orderId, paymentType: fPay })
                         });
+
                         setSuccessData({ bookingId: bookingData.booking.id, orderId: snapData.orderId, status: 'pending' });
                         setBookingStep(2);
+                        // Mulai polling setiap 5 detik
+                        startPolling(snapData.orderId, bookingData.booking.id);
+
+                        // DEV ONLY: Hit auto-simulate agar webhook terpicu / status di DB langsung terupdate
+                        fetch('/api/simulate-payment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId: snapData.orderId })
+                        }).catch(e => console.error("Auto-simulate failed:", e));
+
                     },
                     onError: (err) => {
                         console.error('Snap Error:', err);
@@ -280,7 +318,7 @@ export default function CarDetail() {
                                 />
                                 <div className="absolute top-4 left-4 sm:top-8 sm:left-8 right-4 sm:right-auto flex flex-wrap gap-2 sm:gap-3">
                                     <span className={`${isDark ? 'px-3 py-1.5 sm:px-4 sm:py-2 bg-emerald-500 text-white text-[9px] sm:text-[11px] font-black uppercase tracking-widest rounded-xl shadow-lg' : 'px-3 py-1.5 sm:px-4 sm:py-2 bg-emerald-500 text-slate-800 text-[9px] sm:text-[11px] font-black uppercase tracking-widest rounded-xl shadow-lg'}`}>Verified Fleet</span>
-                                    <span className="px-3 py-1.5 sm:px-4 sm:py-2 bg-[#0B0F19]/95 backdrop-blur text-[#C5A059] text-[9px] sm:text-[11px] font-black uppercase tracking-widest rounded-xl shadow-lg flex items-center gap-1.5 sm:gap-2">
+                                    <span className={`${isDark ? 'px-3 py-1.5 sm:px-4 sm:py-2 bg-[#0B0F19]/95 backdrop-blur text-[#C5A059] text-[9px] sm:text-[11px] font-black uppercase tracking-widest rounded-xl shadow-lg flex items-center gap-1.5 sm:gap-2' : 'px-3 py-1.5 sm:px-4 sm:py-2 bg-white/95 backdrop-blur text-[#C5A059] text-[9px] sm:text-[11px] font-black uppercase tracking-widest rounded-xl shadow-lg flex items-center gap-1.5 sm:gap-2'}`}>
                                         <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-[#C5A059]" /> {displayRating} {ratingsData.total > 0 && <span className="text-gray-500">({ratingsData.total})</span>}
                                     </span>
                                 </div>
@@ -289,7 +327,7 @@ export default function CarDetail() {
 
                         {/* ─── 3. DETAIL KONTEN MOBIL (Mobile: Paling bawah) ─── */}
                         <div className="order-3 lg:col-span-7 xl:col-span-8 lg:col-start-1 lg:row-start-2">
-                            <div className={`${isDark ? 'bg-[#0B0F19] rounded-[2.5rem] p-8 md:p-12 border border-neutral-900 shadow-sm' : 'bg-[#F4F7FE] rounded-[2.5rem] p-8 md:p-12 border border-neutral-900 shadow-sm'}`}>
+                            <div className={`${isDark ? 'bg-[#0B0F19] rounded-[2.5rem] p-8 md:p-12 border border-neutral-900 shadow-sm' : 'bg-white rounded-[2.5rem] p-8 md:p-12 border border-slate-200 shadow-sm'}`}>
                                 <div className="mb-10">
                                     <p className="text-sm font-bold text-[#C5A059] uppercase tracking-[0.4em] mb-3">Unit Premium Edition</p>
                                     <h1 className={`${isDark ? 'text-5xl font-black text-white tracking-tight leading-tight' : 'text-5xl font-black text-slate-800 tracking-tight leading-tight'}`}>{car.model}</h1>
@@ -341,7 +379,7 @@ export default function CarDetail() {
                                         </h3>
 
                                         {/* Average Rating Display */}
-                                        <div className={`${isDark ? 'bg-[#0a0a0a] p-6 sm:p-8 rounded-3xl border border-neutral-900 mb-8' : 'bg-[#F4F7FE] p-6 sm:p-8 rounded-3xl border border-neutral-900 mb-8'}`}>
+                                        <div className={`${isDark ? 'bg-[#0a0a0a] p-6 sm:p-8 rounded-3xl border border-neutral-900 mb-8' : 'bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200 mb-8'}`}>
                                             <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
                                                 <div className="text-center w-full md:w-auto">
                                                     <p className="text-5xl font-black text-[#C5A059]">{displayRating}</p>
@@ -360,7 +398,7 @@ export default function CarDetail() {
                                                             <div key={level} className="flex items-center gap-3">
                                                                 <span className="text-[10px] font-bold text-gray-500 w-3">{level}</span>
                                                                 <Star className="w-3 h-3 fill-[#C5A059] text-[#C5A059]" />
-                                                                <div className="flex-1 h-2 bg-neutral-800 rounded-full overflow-hidden">
+                                                                <div className={`flex-1 h-2 rounded-full overflow-hidden ${isDark ? 'bg-neutral-800' : 'bg-slate-200'}`}>
                                                                     <div className="h-full bg-[#C5A059] rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
                                                                 </div>
                                                                 <span className="text-[10px] font-bold text-gray-600 w-5 text-right">{count}</span>
@@ -475,11 +513,11 @@ export default function CarDetail() {
                         {/* ─── 2. CHECKOUT (Mobile: Langsung di bawah gambar) ─── */}
                         <div className="order-2 lg:col-span-5 xl:col-span-4 lg:col-start-8 xl:col-start-9 lg:row-start-1 lg:row-span-2">
                             <div className="sticky top-28 space-y-6">
-                                <div className={`${isDark ? 'bg-[#0B0F19] rounded-[2.5rem] p-8 md:p-10 border border-neutral-800 shadow-2xl shadow-black/[0.02] relative overflow-hidden' : 'bg-[#F4F7FE] rounded-[2.5rem] p-8 md:p-10 border border-neutral-800 shadow-2xl shadow-black/[0.02] relative overflow-hidden'}`}>
+                                <div className={`${isDark ? 'bg-[#0B0F19] rounded-[2.5rem] p-8 md:p-10 border border-neutral-800 shadow-2xl shadow-black/[0.02] relative overflow-hidden' : 'bg-white rounded-[2.5rem] p-8 md:p-10 border border-slate-200 shadow-xl shadow-slate-100 relative overflow-hidden'}`}>
 
                                     {bookingStep === 1 ? (
                                         <form onSubmit={handleCheckout} className="space-y-6">
-                                            <div className="flex justify-between items-center mb-8 pb-6 border-b border-neutral-900">
+                                            <div className={`flex justify-between items-center mb-8 pb-6 border-b ${isDark ? 'border-neutral-900' : 'border-slate-200'}`}>
                                                 <h3 className={`${isDark ? 'text-2xl font-black text-white tracking-tight' : 'text-2xl font-black text-slate-800 tracking-tight'}`}>Booking</h3>
                                                 <div className="text-right">
                                                     <p className={`${isDark ? 'text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1' : 'text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1'}`}>Per Hari</p>
@@ -490,11 +528,11 @@ export default function CarDetail() {
                                             <div className="space-y-5">
                                                 <div className="space-y-2">
                                                     <label className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1'}`}>Nama Lengkap</label>
-                                                    <input required type="text" className={`${isDark ? 'w-full bg-[#0a0a0a] text-white border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-[#0B0F19] focus:border-[#C5A059] transition-all outline-none' : 'w-full bg-[#F4F7FE] text-slate-800 border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-[#0B0F19] focus:border-[#C5A059] transition-all outline-none'}`} placeholder="Masukkan nama Anda" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                                                    <input required type="text" className={`${isDark ? 'w-full bg-[#0a0a0a] text-white border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-[#0B0F19] focus:border-[#C5A059] transition-all outline-none' : 'w-full bg-white text-slate-800 border border-slate-200 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-white focus:border-[#C5A059] transition-all outline-none'}`} placeholder="Masukkan nama Anda" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                                                 </div>
                                                 <div className="space-y-2">
                                                     <label className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1'}`}>No. WhatsApp</label>
-                                                    <input required type="tel" className={`${isDark ? 'w-full bg-[#0a0a0a] text-white border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-[#0B0F19] focus:border-[#C5A059] transition-all outline-none' : 'w-full bg-[#F4F7FE] text-slate-800 border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-[#0B0F19] focus:border-[#C5A059] transition-all outline-none'}`} placeholder="08..." value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+                                                    <input required type="tel" className={`${isDark ? 'w-full bg-[#0a0a0a] text-white border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-[#0B0F19] focus:border-[#C5A059] transition-all outline-none' : 'w-full bg-white text-slate-800 border border-slate-200 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-white focus:border-[#C5A059] transition-all outline-none'}`} placeholder="08..." value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
                                                 </div>
                                                 <DateRangePicker
                                                     startDate={formData.startDate}
@@ -506,7 +544,7 @@ export default function CarDetail() {
 
                                                 <div
                                                     onClick={() => setFormData({ ...formData, withDriver: !formData.withDriver })}
-                                                    className={`${isDark ? 'flex items-center gap-4 mt-4 p-4 bg-[#0a0a0a] border border-neutral-800 rounded-2xl cursor-pointer hover:border-neutral-700 transition-colors' : 'flex items-center gap-4 mt-4 p-4 bg-[#F4F7FE] border border-neutral-800 rounded-2xl cursor-pointer hover:border-neutral-700 transition-colors'}`}
+                                                    className={`${isDark ? 'flex items-center gap-4 mt-4 p-4 bg-[#0a0a0a] border border-neutral-800 rounded-2xl cursor-pointer hover:border-neutral-700 transition-colors' : 'flex items-center gap-4 mt-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer hover:border-[#C5A059]/50 transition-colors'}`}
                                                 >
                                                     <div className={`w-5 h-5 rounded flex items-center justify-center border transition-all ${formData.withDriver ? 'bg-[#C5A059] border-[#C5A059]' : 'border-neutral-700 bg-transparent'}`}>
                                                         {formData.withDriver && <CheckCircle2 className="w-3 h-3 text-[#0a0a0a]" />}
@@ -518,7 +556,7 @@ export default function CarDetail() {
                                                 </div>
                                             </div>
 
-                                            <div className={`${isDark ? 'bg-[#0a0a0a] p-6 rounded-3xl mt-6 border border-neutral-800 text-left' : 'bg-[#F4F7FE] p-6 rounded-3xl mt-6 border border-neutral-800 text-left'}`}>
+                                            <div className={`${isDark ? 'bg-[#0a0a0a] p-6 rounded-3xl mt-6 border border-neutral-800 text-left' : 'bg-slate-50 p-6 rounded-3xl mt-6 border border-slate-200 text-left'}`}>
                                                 <div className="flex justify-between items-center mb-1">
                                                     <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Sewa ({rentalDays} Hari)</span>
                                                     <span className={`${isDark ? 'text-xs font-bold text-white' : 'text-xs font-bold text-slate-800'}`}>{formatPrice(car.pricePerDay * rentalDays)}</span>
@@ -545,25 +583,38 @@ export default function CarDetail() {
                                                     {isProcessing ? <><Loader2 className="w-5 h-5 animate-spin" /> MENGHUBUNGKAN...</> : !snapReady ? <><Loader2 className="w-5 h-5 animate-spin" /> LOADING SDK...</> : <><ShieldCheck className="w-5 h-5" /> BOOKING SEKARANG <ArrowRight className="w-5 h-5" /></>}
                                                 </button>
                                                 <p className="text-[10px] text-gray-500 mt-5 text-center font-bold flex items-center justify-center gap-2 tracking-widest uppercase">
-                                                    <Lock className="w-3.5 h-3.5" /> SECURE CHECKOUT BY MIDTRANS
+                                                    <Lock className="w-3.5 h-3.5" /> SECURE CHECKOUT BY POINTRENTAL
                                                 </p>
                                             </div>
                                         </form>
                                     ) : (
                                         <div className="text-center py-4 animate-in zoom-in-95 duration-700">
-                                            <div className="w-24 h-24 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl">
-                                                <CheckCircle2 className="w-12 h-12" />
-                                            </div>
-                                            <h3 className={`${isDark ? 'text-4xl font-black text-white mb-4 tracking-tighter' : 'text-4xl font-black text-slate-800 mb-4 tracking-tighter'}`}>Booking Sukses!</h3>
+                                            {successData?.status === 'pending' ? (
+                                                // ── PENDING SCREEN ──
+                                                <div className="w-24 h-24 bg-amber-500/20 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl">
+                                                    <Hourglass className="w-12 h-12 rotate-90" />
+                                                </div>
+                                            ) : (
+                                                // ── SUCCESS SCREEN ──
+                                                <div className="w-24 h-24 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl">
+                                                    <CheckCircle2 className="w-12 h-12" />
+                                                </div>
+                                            )}
+                                            <h3 className={`${isDark ? 'text-4xl font-black text-white mb-4 tracking-tighter' : 'text-4xl font-black text-slate-800 mb-4 tracking-tighter'}`}>
+                                                {successData?.status === 'pending' ? 'Menunggu Pembayaran' : 'Booking Sukses!'}
+                                            </h3>
                                             <p className="text-sm text-gray-500 font-bold mb-10 max-w-[280px] mx-auto leading-relaxed">
-                                                Terima kasih **{formData.name}**. Anda telah berhasil menyelesaikan transaksi.
+                                                {successData?.status === 'pending'
+                                                    ? `Halo ${formData.name}, pesanan Anda telah diterima. Segera selesaikan pembayaran untuk konfirmasi booking.`
+                                                    : `Terima kasih ${formData.name}. Pembayaran berhasil & booking Anda telah dikonfirmasi.`
+                                                }
                                             </p>
-                                            <div className={`${isDark ? 'bg-[#0a0a0a] p-6 rounded-[2.5rem] text-left space-y-4 mb-10 border border-neutral-900' : 'bg-[#F4F7FE] p-6 rounded-[2.5rem] text-left space-y-4 mb-10 border border-neutral-900'}`}>
+                                            <div className={`${isDark ? 'bg-[#0a0a0a] p-6 rounded-[2.5rem] text-left space-y-4 mb-10 border border-neutral-900' : 'bg-slate-50 p-6 rounded-[2.5rem] text-left space-y-4 mb-10 border border-slate-200'}`}>
                                                 <div className="flex justify-between items-center"><span className={`${isDark ? 'text-[10px] text-gray-400 font-black uppercase tracking-widest' : 'text-[10px] text-slate-500 font-black uppercase tracking-widest'}`}>ORDER ID</span><span className={`${isDark ? 'text-xs font-black text-white uppercase' : 'text-xs font-black text-slate-800 uppercase'}`}>{successData?.orderId || "PR-ERROR"}</span></div>
                                                 <div className="flex justify-between items-center"><span className={`${isDark ? 'text-[10px] text-gray-400 font-black uppercase tracking-widest' : 'text-[10px] text-slate-500 font-black uppercase tracking-widest'}`}>ARMADA</span><span className="text-xs font-black text-[#C5A059]">{car.model}</span></div>
-                                                <div className="flex justify-between items-center"><span className={`${isDark ? 'text-[10px] text-gray-400 font-black uppercase tracking-widest' : 'text-[10px] text-slate-500 font-black uppercase tracking-widest'}`}>STATUS</span><span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${successData?.status === 'pending' ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-500'}`}>{successData?.status === 'pending' ? 'PENDING' : 'VERIFIED'}</span></div>
+                                                <div className="flex justify-between items-center"><span className={`${isDark ? 'text-[10px] text-gray-400 font-black uppercase tracking-widest' : 'text-[10px] text-slate-500 font-black uppercase tracking-widest'}`}>STATUS</span><span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${successData?.status === 'pending' ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-500'}`}>{successData?.status === 'pending' ? 'PENDING PAYMENT' : 'VERIFIED'}</span></div>
                                             </div>
-                                            <Link href="/" className={`${isDark ? 'block w-full py-5 bg-[#0a0a0a] border border-neutral-800 text-white font-black rounded-2xl hover:bg-[#C5A059] hover:border-[#C5A059] transition-all active:scale-95' : 'block w-full py-5 bg-[#F4F7FE] border border-neutral-800 text-slate-800 font-black rounded-2xl hover:bg-[#C5A059] hover:border-[#C5A059] transition-all active:scale-95'}`}>
+                                            <Link href="/" className={`${isDark ? 'block w-full py-5 bg-[#0a0a0a] border border-neutral-800 text-white font-black rounded-2xl hover:bg-[#C5A059] hover:border-[#C5A059] transition-all active:scale-95' : 'block w-full py-5 bg-slate-50 border border-slate-200 text-slate-800 font-black rounded-2xl hover:bg-[#C5A059] hover:border-[#C5A059] transition-all active:scale-95'}`}>
                                                 Kembali ke Beranda
                                             </Link>
                                         </div>

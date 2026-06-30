@@ -36,9 +36,11 @@ export default function AdminDashboard() {
             setBookings(data);
 
             const total = data.length;
-            const revenue = data.reduce((acc, curr) => acc + curr.totalPrice, 0); // Semua dijumlahkan
-            const pending = 0; // Dipaksa 0 selamanya
-            const active = data.length; // Otomatis semua lunas
+            const revenue = data
+                .filter(b => b.status === 'PAID')
+                .reduce((acc, curr) => acc + curr.totalPrice, 0);
+            const pending = data.filter(b => b.status === 'PENDING_PAYMENT').length;
+            const active = data.filter(b => b.status === 'PAID').length;
 
             setStats({ total, revenue, pending, active });
         } catch (error) {
@@ -242,26 +244,33 @@ export default function AdminDashboard() {
                                     <button onClick={() => setActiveTab('Booking & Transaksi')} className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 text-sm font-semibold rounded-lg transition-colors border border-slate-200">Lihat Semua</button>
                                 </div>
                                 <div className="space-y-4">
-                                    {recentActivity.map((b) => (
-                                        <div key={b.id} className="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-emerald-100 text-emerald-600">
-                                                    <CheckCircle className="w-6 h-6" />
-                                                </div>
-                                                <div>
-                                                    <h5 className="font-bold text-base text-slate-800 mb-1 font-sans">{b.customerName} menyewa {b.carModel}</h5>
-                                                    <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                                                        <CalendarIcon className="w-4 h-4" /> {new Date(b.createdAt).toLocaleDateString('id-ID')}
-                                                        <span>•</span>
-                                                        <span className="px-2 py-0.5 rounded-md font-bold text-[10px] uppercase bg-emerald-100 text-emerald-700">LUNAS</span>
+                                    {recentActivity.map((b) => {
+                                        const isPaid = b.status === 'PAID';
+                                        const isPending = b.status === 'PENDING_PAYMENT';
+                                        const isFailed = b.status === 'FAILED';
+                                        return (
+                                            <div key={b.id} className="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${isPaid ? 'bg-emerald-100 text-emerald-600' : isPending ? 'bg-amber-100 text-amber-600' : 'bg-red-100 text-red-500'}`}>
+                                                        {isPaid ? <CheckCircle className="w-6 h-6" /> : isPending ? <Clock className="w-6 h-6" /> : <XCircle className="w-6 h-6" />}
+                                                    </div>
+                                                    <div>
+                                                        <h5 className="font-bold text-base text-slate-800 mb-1 font-sans">{b.customerName} menyewa {b.carModel}</h5>
+                                                        <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
+                                                            <CalendarIcon className="w-4 h-4" /> {new Date(b.createdAt).toLocaleDateString('id-ID')}
+                                                            <span>•</span>
+                                                            <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] uppercase ${isPaid ? 'bg-emerald-100 text-emerald-700' : isPending ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
+                                                                {isPaid ? 'LUNAS' : isPending ? 'MENUNGGU' : 'GAGAL'}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                <div className="flex flex-col items-end gap-2 shrink-0">
+                                                    <span className="font-bold text-lg text-slate-800">Rp {b.totalPrice?.toLocaleString('id-ID')}</span>
+                                                </div>
                                             </div>
-                                            <div className="flex flex-col items-end gap-2 shrink-0">
-                                                <span className="font-bold text-lg text-slate-800">Rp {b.totalPrice?.toLocaleString('id-ID')}</span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                     {recentActivity.length === 0 && (
                                         <div className="text-center py-10 text-slate-500 bg-slate-50 rounded-xl border border-slate-100">Belum ada aktivitas.</div>
                                     )}
@@ -356,7 +365,18 @@ export default function AdminDashboard() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <span className="px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 border border-emerald-200">LUNAS</span>
+                                                {(() => {
+                                                    const isPaid = b.status === 'PAID';
+                                                    const isPending = b.status === 'PENDING_PAYMENT';
+                                                    return (
+                                                        <span className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${isPaid ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                                                                isPending ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                                                                    'bg-red-100 text-red-700 border border-red-200'
+                                                            }`}>
+                                                            {isPaid ? 'LUNAS' : isPending ? 'MENUNGGU' : 'GAGAL'}
+                                                        </span>
+                                                    );
+                                                })()}
                                             </td>
                                         </tr>
                                     ))}
