@@ -23,18 +23,13 @@ function useCountUp(end, duration = 2000) {
     }, [started, end, duration]);
     return { count, ref };
 }
-
 export default function About() {
     const { isLight } = useTheme();
     const isDark = !isLight;
-    const s1 = useCountUp(8, 1500);
-    const s2 = useCountUp(500, 2000);
-    const s3 = useCountUp(6, 1400);
-    const s4 = useCountUp(15, 1600);
 
     return (
         <main className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-text)' }}>
-            <Navbar />
+            <Navbar forceLightText={true} />
 
             {/* ═══ PAGE HEADER ═══ */}
             <section className="relative pt-24 pb-16 h-[50vh] min-h-[400px] max-h-[550px] overflow-hidden flex items-center">
@@ -53,30 +48,6 @@ export default function About() {
                                 Partner perjalanan premium yang mengutamakan kenyamanan, keamanan, dan prestise Anda.
                             </p>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ═══ STATS BAR ═══ */}
-            <section className="py-10 border-b transition-colors" style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
-                <div className="max-w-6xl mx-auto px-6">
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                        {[
-                            { ref: s1.ref, count: s1.count, suffix: '+', label: 'Tahun Pengalaman', icon: <Award className="w-5 h-5" /> },
-                            { ref: s2.ref, count: s2.count, suffix: '+', label: 'Klien Dilayani', icon: <Users className="w-5 h-5" /> },
-                            { ref: s3.ref, count: s3.count, suffix: '+', label: 'Unit Armada', icon: <Star className="w-5 h-5" /> },
-                            { ref: s4.ref, count: s4.count, suffix: '+', label: 'Kota Terjangkau', icon: <MapPin className="w-5 h-5" /> },
-                        ].map((stat, i) => (
-                            <div key={i} ref={stat.ref} className="flex items-center gap-4 p-5 rounded-xl border hover:shadow-lg hover:border-[#C5A059]/30 transition-all group" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-card)' }}>
-                                <div className={`w-12 h-12 rounded-xl border flex items-center justify-center text-[#C5A059] group-hover:scale-110 transition-transform flex-shrink-0 ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#C5A059]/10 border-[#C5A059]/20'}`}>
-                                    {stat.icon}
-                                </div>
-                                <div>
-                                    <p className="text-2xl font-bold" style={{ color: 'var(--theme-text)' }}>{stat.count}{stat.suffix}</p>
-                                    <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{stat.label}</p>
-                                </div>
-                            </div>
-                        ))}
                     </div>
                 </div>
             </section>
@@ -159,16 +130,16 @@ export default function About() {
 
             {/* ═══ CTA ═══ */}
             <section className="py-14 px-6 transition-colors" style={{ background: 'var(--theme-bg)' }}>
-                <div className="max-w-6xl mx-auto relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0a0e1a] via-[#131831] to-[#0a0e1a] p-10 md:p-14 text-center">
+                <div className={isDark ? 'max-w-6xl mx-auto relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0a0e1a] via-[#131831] to-[#0a0e1a] p-10 md:p-14 text-center' : 'max-w-6xl mx-auto relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#ffffff] via-[#e2e8f0] to-[#ffffff] p-10 md:p-14 text-center'}>
                     <div className="absolute top-0 right-0 w-60 h-60 rounded-full bg-[#C5A059]/8 blur-[80px]" />
                     <div className="relative z-10">
-                        <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 tracking-tight">Siap Merasakan Kemewahan?</h2>
-                        <p className="text-gray-400 font-medium mb-8 max-w-md mx-auto text-sm">Jelajahi koleksi armada premium kami dan temukan kendaraan yang sempurna.</p>
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                            <Link href="/katalog" className="px-7 py-3.5 bg-gradient-to-r from-[#C5A059] to-[#AF955B] text-white font-bold rounded-xl hover:shadow-lg hover:shadow-[#C5A059]/20 transition-all flex items-center gap-2 group active:scale-[0.98]">
+                        <h2 className={isDark ? 'text-3xl md:text-3xl font-bold text-white mb-3 tracking-tight' : 'text-2xl md:text-3xl font-bold text-black mb-3 tracking-tight'}>Siap Merasakan Kemewahan?</h2>
+                        <p className={isDark ? 'text-gray-400 font-medium mb-8 max-w-md mx-auto text-sm' : 'text-gray-500 font-medium mb-8 max-w-md mx-auto text-sm'}>Jelajahi koleksi armada premium kami dan temukan kendaraan yang sempurna.</p>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
+                            <Link href="/katalog" className="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-[#C5A059] to-[#AF955B] text-white font-bold rounded-xl hover:shadow-lg hover:shadow-[#C5A059]/20 transition-all flex items-center justify-center gap-2 group active:scale-[0.98]">
                                 Jelajahi Armada <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </Link>
-                            <Link href="/kontak" className="px-7 py-3.5 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition-all">
+                            <Link href="/kontak" className={`${isDark ? "bg-white/5 border-white/10 text-white" : "bg-black/5 border-black/10 text-black"} w-full sm:w-auto px-7 py-3.5 border font-bold rounded-xl hover:bg-black/10 transition-all text-center`}>
                                 Hubungi Kami
                             </Link>
                         </div>

@@ -38,10 +38,10 @@ export default function Contact() {
     const { isLight } = useTheme();
     const isDark = !isLight;
 
-    const stats1 = useCountUp(500, 2000);
-    const stats2 = useCountUp(24, 1500);
-    const stats3 = useCountUp(98, 2000);
-    const stats4 = useCountUp(15, 1800);
+    const stats1 = useCountUp(500, 1000);
+    const stats2 = useCountUp(24, 1000);
+    const stats3 = useCountUp(98, 1000);
+    const stats4 = useCountUp(15, 1000);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -60,7 +60,7 @@ export default function Contact() {
 
     return (
         <main className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-text)' }}>
-            <Navbar />
+            <Navbar forceLightText={true} />
 
             {/* ═══ HERO HEADER — HALF SCREEN WITH CAR BG ═══ */}
             <section className="relative pt-24 pb-16 h-[50vh] min-h-[400px] max-h-[550px] overflow-hidden flex items-center">
@@ -165,7 +165,7 @@ export default function Contact() {
                                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                     className="w-full border rounded-xl py-3 px-4 text-sm font-medium outline-none transition-all placeholder:text-gray-400 focus:border-[#C5A059]/50 focus:shadow-md"
                                                     style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
-                                                    placeholder="+62 8xx xxxx xxxx" />
+                                                    placeholder="Masukkan Nomor WhatsApp" />
                                             </div>
                                         </div>
                                         <div className="space-y-1.5">
@@ -217,7 +217,7 @@ export default function Contact() {
                                         {[
                                             { day: 'Senin - Jumat', time: '08:00 - 22:00', active: true },
                                             { day: 'Sabtu', time: '09:00 - 21:00', active: true },
-                                            { day: 'Minggu & Libur', time: '10:00 - 18:00', active: false },
+                                            { day: 'Minggu', time: 'Tidak Beroperasi', active: false },
                                         ].map((s, i) => (
                                             <div key={i} className="flex items-center justify-between py-2.5 border-b last:border-0" style={{ borderColor: 'var(--theme-border)' }}>
                                                 <span className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>{s.day}</span>
@@ -233,14 +233,14 @@ export default function Contact() {
                             </div>
 
                             {/* Map */}
-                            <div className="relative rounded-2xl overflow-hidden shadow-xl border h-44" style={{ borderColor: 'var(--theme-border)' }}>
+                            <div className={isDark ? 'relative rounded-2xl overflow-hidden shadow-xl border h-44 color-grey' : 'relative rounded-2xl overflow-hidden shadow-xl border h-44'} style={{ borderColor: 'var(--theme-border)' }}>
                                 <iframe
                                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.4898844702943!2d106.7562153739939!3d-6.585863293407734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69c5457e0e3bcf%3A0x58481d58737539c0!2sSMK%20Negeri%201%20Ciomas!5e0!3m2!1sid!2sid!4v1782621767795!5m2!1sid!2sid"
-                                    className="w-full h-full border-0 transition-all duration-700"
+                                    className={isDark ? 'w-full h-full border-0 transition-all duration-700 grayscale' : 'w-full h-full border-0 transition-all duration-700'}
                                     allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade"
                                 />
                                 <div className="absolute bottom-3 left-3 right-3">
-                                    <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer"
+                                    <a href="https://maps.app.goo.gl/r7Mkst4cyuDsx89BA" target="_blank" rel="noopener noreferrer"
                                         className="flex items-center justify-center gap-2 w-full py-2.5 bg-white/90 backdrop-blur-sm rounded-lg text-xs font-bold text-slate-800 hover:bg-white transition-all shadow-md">
                                         <Globe className="w-3.5 h-3.5 text-[#C5A059]" />
                                         Buka di Google Maps
@@ -271,7 +271,7 @@ export default function Contact() {
             </section>
 
             {/* ═══ STATS ═══ */}
-            <section className="py-16 relative overflow-hidden transition-colors" style={{ background: 'var(--theme-bg)' }}>
+            <section className="py-16 relative overflow-hidden transition-colors -mt-[1px] z-20" style={{ background: 'var(--theme-bg)' }}>
                 <div className="absolute top-0 left-1/4 w-72 h-72 rounded-full bg-[#C5A059]/10 blur-[80px]" />
                 <div className="max-w-6xl mx-auto px-6 relative z-10">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -306,7 +306,7 @@ export default function Contact() {
                         {[
                             { q: 'Bagaimana cara melakukan reservasi mobil?', a: 'Anda dapat melakukan reservasi melalui website kami, WhatsApp, atau menghubungi hotline VIP. Tim kami akan membantu memilih armada terbaik sesuai kebutuhan Anda.' },
                             { q: 'Apakah tersedia layanan antar-jemput?', a: 'Ya, kami menyediakan layanan antar-jemput gratis di area Jabodetabek.' },
-                            { q: 'Berapa minimum durasi sewa?', a: 'Minimum durasi sewa adalah 24 jam. Kami juga menyediakan paket harian, mingguan, dan bulanan.' },
+                            { q: 'Berapa minimum durasi sewa?', a: 'Minimum durasi sewa adalah 1 hari. Kami juga menyediakan paket harian, mingguan, dan bulanan.' },
                             { q: 'Apakah mobil sudah termasuk asuransi?', a: 'Seluruh armada kami telah dilengkapi asuransi komprehensif (all-risk).' },
                             { q: 'Bagaimana kebijakan pembatalan?', a: 'Pembatalan H-24 tanpa biaya. Kurang dari 24 jam dikenakan biaya administrasi 20%.' },
                         ].map((faq, i) => (

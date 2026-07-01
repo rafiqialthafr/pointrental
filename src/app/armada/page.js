@@ -39,7 +39,7 @@ export default function Catalog() {
 
     return (
         <main className="min-h-screen flex flex-col" style={{ background: 'var(--theme-bg)', color: 'var(--theme-text)' }}>
-            <Navbar />
+            <Navbar forceLightText={true} />
 
             {/* ═══ PAGE HEADER ═══ */}
             <section className="relative pt-24 pb-16 h-[50vh] min-h-[400px] max-h-[550px] overflow-hidden flex items-center">
@@ -75,7 +75,7 @@ export default function Catalog() {
             </section>
 
             {/* ═══ FILTER & LISTING ═══ */}
-            <section className="flex-grow py-10 relative z-20">
+            <section className="flex-grow py-10 relative z-20 -mt-[1px]">
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="flex flex-col lg:flex-row gap-8">
                         {/* Mobile Toggle */}
