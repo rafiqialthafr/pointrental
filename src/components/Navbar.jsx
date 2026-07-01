@@ -5,12 +5,13 @@ import { usePathname } from 'next/navigation';
 import { Menu, X, Car, Sun, Moon } from 'lucide-react';
 import { useTheme } from '@/components/ThemeContext';
 
-export default function Navbar() {
+export default function Navbar({ forceLightText = false }) {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const pathname = usePathname();
     const { isLight, setIsLight } = useTheme();
     const isDark = !isLight;
+    const useWhiteText = forceLightText && !isScrolled;
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -55,7 +56,7 @@ export default function Navbar() {
                                 className="w-8 h-8 object-contain"
                             />
                         </div>
-                        <span className={`text-lg font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                        <span className={`text-lg font-bold tracking-tight ${useWhiteText ? 'text-white' : (isDark ? 'text-white' : 'text-slate-800')}`}>
                             Point<span className="text-[#C5A059]">Rental</span>
                         </span>
                     </Link>
@@ -68,7 +69,7 @@ export default function Navbar() {
                                 key={link.label}
                                 href={link.href}
                                 onClick={(e) => handleNavLinkClick(e, link.href)}
-                                className={`px-4 py-2 text-sm font-bold transition-all duration-300 hover:text-[#C5A059] hover:drop-shadow-[0_0_8px_rgba(197,160,89,0.4)] ${isDark ? 'text-gray-300' : 'text-slate-900'}`}
+                                className={`px-4 py-2 text-sm font-bold transition-all duration-300 hover:text-[#C5A059] hover:drop-shadow-[0_0_8px_rgba(197,160,89,0.4)] ${useWhiteText ? 'text-white/90' : (isDark ? 'text-gray-300' : 'text-slate-900')}`}
                             >
                                 {link.label}
                             </Link>
@@ -101,46 +102,61 @@ export default function Navbar() {
                     {/* Mobile: Theme Toggle + Hamburger Menu Toggle */}
                     {/* Tampilkan fleksibel di layar HP, sembunyikan ('md:hidden') saat masuk ukuran tablet/desktop */}
                     <div className="md:hidden flex items-center gap-2">
-                        <button onClick={toggleTheme} className={`p-2 rounded-lg border border-[#C5A059] ${isDark ? 'text-amber-400 bg-[#C5A059]/5' : 'text-[#C5A059] bg-[#C5A059]/5'}`}>
+                        <button onClick={toggleTheme} className={`p-2 rounded-lg border border-[#C5A059] transition-colors ${isDark ? 'text-amber-400 bg-[#C5A059]/5' : 'text-[#C5A059] bg-[#C5A059]/5'}`}>
                             {isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
                         </button>
                         <button
-                            className={`p-2 ${isDark ? 'text-white' : 'text-slate-700'}`}
+                            className={`p-2 transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-180' : 'rotate-0'} ${useWhiteText ? 'text-white' : (isDark ? 'text-white' : 'text-slate-700')}`}
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            aria-label="Toggle menu"
                         >
                             {isMobileMenuOpen ? <X /> : <Menu />}
                         </button>
                     </div>
                 </div>
 
-                {/* Mobile Menu Overlay */}
-                {/* Hanya dirender jika isMobileMenuOpen true. Disembunyikan oleh 'md:hidden' jika layar membesar */}
-                {
-                    isMobileMenuOpen && (
-                        <div className={`md:hidden pt-4 pb-2 space-y-2 border-t mt-4 px-4 rounded-xl shadow-2xl ${isDark
-                            ? 'border-white/10 bg-[#0B0F19]/95 backdrop-blur-3xl'
-                            : 'border-black/5 bg-white/95 backdrop-blur-3xl'
-                            }`}>
-                            {navLinks.map((link) => (
-                                <Link
-                                    key={link.label}
-                                    href={link.href}
-                                    onClick={(e) => {
-                                        handleNavLinkClick(e, link.href);
-                                        setIsMobileMenuOpen(false);
-                                    }}
-                                    className={`block px-4 py-2 text-sm font-bold rounded-lg ${isDark
-                                        ? 'text-gray-300 hover:text-[#AF955B] hover:bg-[#AF955B]/5'
-                                        : 'text-slate-900 hover:text-[#AF955B] hover:bg-[#AF955B]/5'
-                                        }`}
-                                >
-                                    {link.label}
-                                </Link>
-                            ))}
+                {/* Mobile Menu Overlay - Smooth Transitional Dropdown */}
+                <div
+                    className={`md:hidden overflow-hidden transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'max-h-[400px] opacity-100 mt-4' : 'max-h-0 opacity-0 mt-0 pointer-events-none'
+                        }`}
+                >
+                    <div className={`pt-4 pb-4 space-y-1 border-t px-2 rounded-2xl shadow-xl transition-colors ${isDark
+                        ? 'border-white/10 bg-[#0B0F19]/95 backdrop-blur-3xl'
+                        : 'border-black/5 bg-white/95 backdrop-blur-3xl'
+                        }`}>
+                        {navLinks.map((link) => (
+                            <Link
+                                key={link.label}
+                                href={link.href}
+                                onClick={(e) => {
+                                    handleNavLinkClick(e, link.href);
+                                    setIsMobileMenuOpen(false);
+                                }}
+                                className={`group flex items-center justify-between px-4 py-3 text-sm font-bold rounded-xl transition-all ${isDark
+                                    ? 'text-gray-300 hover:text-[#C5A059] hover:bg-[#C5A059]/10'
+                                    : 'text-slate-800 hover:text-[#C5A059] hover:bg-[#C5A059]/10'
+                                    }`}
+                            >
+                                {link.label}
+                                <span className="text-[#C5A059] transition-all transform group-hover:-translate-x-1 group-active:translate-x-0 opacity-0 group-hover:opacity-100 -translate-x-3">
+                                    →
+                                </span>
+                            </Link>
+                        ))}
+
+                        {/* Mobile CTA */}
+                        <div className="pt-3 mt-2 border-t border-dashed border-gray-500/30 px-2">
+                            <Link
+                                href="/armada"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="flex items-center justify-center w-full py-3.5 bg-gradient-to-r from-[#C5A059] to-[#AF955B] text-white text-sm font-bold rounded-xl shadow-lg shadow-[#C5A059]/20 hover:shadow-xl active:scale-[0.98] transition-all"
+                            >
+                                Reservasi Eksklusif
+                            </Link>
                         </div>
-                    )
-                }
-            </nav >
-        </div >
+                    </div>
+                </div>
+            </nav>
+        </div>
     );
 }

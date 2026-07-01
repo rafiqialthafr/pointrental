@@ -43,7 +43,7 @@ function formatDateID(date) {
     return `${date.getDate()} ${MONTHS_ID[date.getMonth()]} ${date.getFullYear()}`;
 }
 
-export default function DateRangePicker({ startDate, endDate, onDateChange, minDate, isDark = true }) {
+export default function DateRangePicker({ startDate, endDate, onDateChange, minDate, isDark = true, singleDate = false }) {
     const [isOpen, setIsOpen] = useState(false);
     const [selecting, setSelecting] = useState('start'); // 'start' or 'end'
     const [tempStart, setTempStart] = useState(startDate ? new Date(startDate) : null);
@@ -96,6 +96,15 @@ export default function DateRangePicker({ startDate, endDate, onDateChange, minD
         clickedDate.setHours(0, 0, 0, 0);
 
         if (isDateBefore(clickedDate, today)) return;
+
+        if (singleDate) {
+            setTempStart(clickedDate);
+            setTempEnd(clickedDate);
+            const startStr = `${clickedDate.getFullYear()}-${String(clickedDate.getMonth() + 1).padStart(2, '0')}-${String(clickedDate.getDate()).padStart(2, '0')}`;
+            onDateChange(startStr, startStr);
+            setIsOpen(false);
+            return;
+        }
 
         if (selecting === 'start') {
             setTempStart(clickedDate);
@@ -190,15 +199,15 @@ export default function DateRangePicker({ startDate, endDate, onDateChange, minD
         return cells;
     };
 
-    const displayText = startDate && endDate
-        ? `${formatDateID(new Date(startDate + 'T00:00:00'))} — ${formatDateID(new Date(endDate + 'T00:00:00'))}`
+    const displayText = startDate
+        ? (singleDate ? formatDateID(new Date(startDate + 'T00:00:00')) : (endDate ? `${formatDateID(new Date(startDate + 'T00:00:00'))} — ${formatDateID(new Date(endDate + 'T00:00:00'))}` : 'Pilih Tanggal Sewa'))
         : 'Pilih Tanggal Sewa';
 
     return (
         <div className={`drp-wrapper${isDark ? '' : ' drp-light'}`}>
             {/* Trigger Button */}
             <div className="drp-field-wrapper">
-                <label className="drp-label">Rentang Tanggal Penyewaan</label>
+                <label className="drp-label">{singleDate ? 'Pilih Tanggal Mulai Sewa' : 'Rentang Tanggal Penyewaan'}</label>
                 <button
                     type="button"
                     onClick={() => setIsOpen(true)}
@@ -219,7 +228,7 @@ export default function DateRangePicker({ startDate, endDate, onDateChange, minD
                     >
                         {/* Header */}
                         <div className="drp-header">
-                            <h4 className="drp-header-title">Pilih Rentang Tanggal</h4>
+                            <h4 className="drp-header-title">{singleDate ? 'Pilih Tanggal Sewa' : 'Pilih Rentang Tanggal'}</h4>
                             <button
                                 type="button"
                                 className="drp-close-btn"
@@ -231,21 +240,25 @@ export default function DateRangePicker({ startDate, endDate, onDateChange, minD
 
                         {/* Selection Indicator */}
                         <div className="drp-indicator">
-                            <div className={`drp-indicator-item ${selecting === 'start' ? 'drp-indicator-active' : ''}`}>
+                            <div className={`drp-indicator-item ${selecting === 'start' || singleDate ? 'drp-indicator-active' : ''}`}>
                                 <span className="drp-indicator-label">Mulai Sewa</span>
                                 <span className="drp-indicator-value">
                                     {tempStart ? formatDateID(tempStart) : '—'}
                                 </span>
                             </div>
-                            <div className="drp-indicator-divider">
-                                <ChevronRight className="w-4 h-4 text-[#C5A059]" />
-                            </div>
-                            <div className={`drp-indicator-item ${selecting === 'end' ? 'drp-indicator-active' : ''}`}>
-                                <span className="drp-indicator-label">Selesai Sewa</span>
-                                <span className="drp-indicator-value">
-                                    {tempEnd ? formatDateID(tempEnd) : '—'}
-                                </span>
-                            </div>
+                            {!singleDate && (
+                                <>
+                                    <div className="drp-indicator-divider">
+                                        <ChevronRight className="w-4 h-4 text-[#C5A059]" />
+                                    </div>
+                                    <div className={`drp-indicator-item ${selecting === 'end' ? 'drp-indicator-active' : ''}`}>
+                                        <span className="drp-indicator-label">Selesai Sewa</span>
+                                        <span className="drp-indicator-value">
+                                            {tempEnd ? formatDateID(tempEnd) : '—'}
+                                        </span>
+                                    </div>
+                                </>
+                            )}
                         </div>
 
                         {/* Calendars Container */}
@@ -307,30 +320,32 @@ export default function DateRangePicker({ startDate, endDate, onDateChange, minD
                         </div>
 
                         {/* Summary & Confirm */}
-                        <div className="drp-footer">
-                            {tempStart && tempEnd && (
-                                <p className="drp-summary">
-                                    {formatDateID(tempStart)} — {formatDateID(tempEnd)}
-                                </p>
-                            )}
-                            <div className="drp-footer-actions">
-                                <button
-                                    type="button"
-                                    className="drp-reset-btn"
-                                    onClick={handleReset}
-                                >
-                                    Reset
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`drp-confirm-btn ${tempStart && tempEnd ? '' : 'drp-confirm-disabled'}`}
-                                    onClick={handleConfirm}
-                                    disabled={!tempStart || !tempEnd}
-                                >
-                                    Selesai
-                                </button>
+                        {!singleDate && (
+                            <div className="drp-footer">
+                                {tempStart && tempEnd && (
+                                    <p className="drp-summary">
+                                        {formatDateID(tempStart)} — {formatDateID(tempEnd)}
+                                    </p>
+                                )}
+                                <div className="drp-footer-actions">
+                                    <button
+                                        type="button"
+                                        className="drp-reset-btn"
+                                        onClick={handleReset}
+                                    >
+                                        Reset
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`drp-confirm-btn ${tempStart && tempEnd ? '' : 'drp-confirm-disabled'}`}
+                                        onClick={handleConfirm}
+                                        disabled={!tempStart || !tempEnd}
+                                    >
+                                        Selesai
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             )}

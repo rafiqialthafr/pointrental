@@ -69,10 +69,13 @@ export default function CarDetail() {
     const [hoverStar, setHoverStar] = useState(0);
     const [submittingRating, setSubmittingRating] = useState(false);
     const [ratingSuccess, setRatingSuccess] = useState(false);
+    const [openDropdown, setOpenDropdown] = useState(''); // 'paket' or 'durasi' atau ''
 
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
+        rentalType: 'harian', // harian, mingguan, bulanan
+        durationMultiplier: 1,
         startDate: '',
         endDate: '',
         withDriver: false
@@ -133,6 +136,9 @@ export default function CarDetail() {
         }).format(price);
 
     const getDaysCount = () => {
+        if (formData.rentalType === 'mingguan') return 7 * formData.durationMultiplier;
+        if (formData.rentalType === 'bulanan') return 30 * formData.durationMultiplier;
+
         if (!formData.startDate || !formData.endDate) return 1;
         const start = new Date(formData.startDate);
         const end = new Date(formData.endDate);
@@ -155,15 +161,28 @@ export default function CarDetail() {
         }
     }
 
-    const grandTotal = (car.pricePerDay * rentalDays) + driverCost + depositCost;
+    const getDiscountMultiplier = () => {
+        if (formData.rentalType === 'mingguan') return 0.10;
+        if (formData.rentalType === 'bulanan') return 0.25;
+        return 0;
+    };
+
+    const subTotalCar = car.pricePerDay * rentalDays;
+    const discountAmount = subTotalCar * getDiscountMultiplier();
+    const grandTotal = (subTotalCar - discountAmount) + driverCost + depositCost;
 
     const todayDateString = new Date().toISOString().split('T')[0];
 
     const handleCheckout = async (e) => {
         e.preventDefault();
 
-        if (!formData.startDate || !formData.endDate) {
-            alert('Silakan pilih tanggal sewa terlebih dahulu.');
+        if (formData.rentalType === 'harian' && (!formData.startDate || !formData.endDate)) {
+            alert('Silakan pilih rentang tanggal sewa harian terlebih dahulu.');
+            return;
+        }
+
+        if ((formData.rentalType === 'mingguan' || formData.rentalType === 'bulanan') && !formData.startDate) {
+            alert('Silakan pilih tanggal mulai sewa terlebih dahulu.');
             return;
         }
 
@@ -179,7 +198,7 @@ export default function CarDetail() {
                     customerEmail: 'customer@pointrental.id', // Tidak pakai form email
                     customerPhone: formData.phone,
                     carId: car.id,
-                    carModel: car.model,
+                    carModel: `${car.model} (Paket ${formData.rentalType.toUpperCase()})`,
                     date: formData.startDate,
                     days: rentalDays,
                     totalPrice: grandTotal
@@ -526,6 +545,40 @@ export default function CarDetail() {
                                             </div>
 
                                             <div className="space-y-5">
+                                                <div className="space-y-2 relative">
+                                                    <label className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1'}`}>Pilih Paket Sewa</label>
+                                                    <div className="relative">
+                                                        <div
+                                                            onClick={() => setOpenDropdown(openDropdown === 'paket' ? '' : 'paket')}
+                                                            className={`${isDark ? 'w-full bg-[#0a0a0a] text-[#C5A059] border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-black tracking-wide cursor-pointer flex justify-between items-center transition-all hover:border-neutral-700' : 'w-full bg-white text-[#C5A059] border border-slate-200 rounded-2xl py-4 px-5 text-sm font-black tracking-wide cursor-pointer shadow-sm flex justify-between items-center transition-all hover:border-[#C5A059]/30'} ${openDropdown === 'paket' ? 'border-[#C5A059] ring-2 ring-[#C5A059]/10' : ''}`}
+                                                        >
+                                                            <span>
+                                                                {formData.rentalType === 'harian' ? 'SEWA HARIAN' :
+                                                                    formData.rentalType === 'mingguan' ? 'SEWA MINGGUAN (DISKON 10%)' :
+                                                                        'SEWA BULANAN (DISKON 25%)'}
+                                                            </span>
+                                                            <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${openDropdown === 'paket' ? 'rotate-[-90deg]' : 'rotate-90'}`} />
+                                                        </div>
+                                                        {openDropdown === 'paket' && (
+                                                            <div className={`absolute top-full left-0 right-0 mt-2 z-50 rounded-xl overflow-hidden py-1 border shadow-xl animate-in fade-in slide-in-from-top-2 ${isDark ? 'bg-[#0a0a0a] border-neutral-800' : 'bg-white border-slate-200'}`}>
+                                                                {[
+                                                                    { id: 'harian', label: 'SEWA HARIAN' },
+                                                                    { id: 'mingguan', label: 'SEWA MINGGUAN (DISKON 10%)' },
+                                                                    { id: 'bulanan', label: 'SEWA BULANAN (DISKON 25%)' }
+                                                                ].map(opt => (
+                                                                    <div
+                                                                        key={opt.id}
+                                                                        onClick={() => { setFormData({ ...formData, rentalType: opt.id }); setOpenDropdown(''); }}
+                                                                        className={`px-5 py-3 text-sm font-bold tracking-wide cursor-pointer flex items-center justify-between transition-colors ${formData.rentalType === opt.id ? 'text-[#C5A059]' : (isDark ? 'text-gray-300 hover:text-white' : 'text-slate-700 hover:text-slate-900')} hover:bg-[#C5A059]/10`}
+                                                                    >
+                                                                        {opt.label}
+                                                                        {formData.rentalType === opt.id && <CheckCircle2 className="w-4 h-4 text-[#C5A059]" />}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
                                                 <div className="space-y-2">
                                                     <label className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1'}`}>Nama Lengkap</label>
                                                     <input required type="text" className={`${isDark ? 'w-full bg-[#0a0a0a] text-white border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-[#0B0F19] focus:border-[#C5A059] transition-all outline-none' : 'w-full bg-white text-slate-800 border border-slate-200 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-white focus:border-[#C5A059] transition-all outline-none'}`} placeholder="Masukkan nama Anda" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
@@ -534,13 +587,55 @@ export default function CarDetail() {
                                                     <label className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1'}`}>No. WhatsApp</label>
                                                     <input required type="tel" className={`${isDark ? 'w-full bg-[#0a0a0a] text-white border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-[#0B0F19] focus:border-[#C5A059] transition-all outline-none' : 'w-full bg-white text-slate-800 border border-slate-200 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-white focus:border-[#C5A059] transition-all outline-none'}`} placeholder="08..." value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
                                                 </div>
-                                                <DateRangePicker
-                                                    startDate={formData.startDate}
-                                                    endDate={formData.endDate}
-                                                    onDateChange={(start, end) => setFormData({ ...formData, startDate: start, endDate: end })}
-                                                    minDate={todayDateString}
-                                                    isDark={isDark}
-                                                />
+                                                {formData.rentalType === 'harian' ? (
+                                                    <DateRangePicker
+                                                        startDate={formData.startDate}
+                                                        endDate={formData.endDate}
+                                                        onDateChange={(start, end) => setFormData({ ...formData, startDate: start, endDate: end })}
+                                                        minDate={todayDateString}
+                                                        isDark={isDark}
+                                                    />
+                                                ) : (
+                                                    <>
+                                                        <DateRangePicker
+                                                            startDate={formData.startDate}
+                                                            endDate={formData.startDate}
+                                                            onDateChange={(start) => setFormData({ ...formData, startDate: start, endDate: start })}
+                                                            minDate={todayDateString}
+                                                            isDark={isDark}
+                                                            singleDate={true}
+                                                        />
+
+                                                        <div className="space-y-2 relative">
+                                                            <label className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1'}`}>Durasi Sewa</label>
+                                                            <div className="relative">
+                                                                <div
+                                                                    onClick={() => setOpenDropdown(openDropdown === 'durasi' ? '' : 'durasi')}
+                                                                    className={`${isDark ? 'w-full bg-[#0a0a0a] text-white border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold cursor-pointer flex justify-between items-center transition-all hover:border-neutral-700' : 'w-full bg-white text-slate-800 border border-slate-200 rounded-2xl py-4 px-5 text-sm font-bold cursor-pointer shadow-sm flex justify-between items-center transition-all hover:border-[#C5A059]/30'} ${openDropdown === 'durasi' ? 'border-[#C5A059] ring-2 ring-[#C5A059]/10' : ''}`}
+                                                                >
+                                                                    <span>
+                                                                        {formData.durationMultiplier} {formData.rentalType === 'mingguan' ? 'Minggu' : 'Bulan'}
+                                                                    </span>
+                                                                    <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'durasi' ? 'rotate-[-90deg]' : 'rotate-90'}`} />
+                                                                </div>
+                                                                {openDropdown === 'durasi' && (
+                                                                    <div className={`absolute top-full left-0 right-0 mt-2 z-50 rounded-xl overflow-hidden py-1 border shadow-xl animate-in fade-in slide-in-from-top-2 max-h-48 overflow-y-auto ${isDark ? 'bg-[#0a0a0a] border-neutral-800' : 'bg-white border-slate-200'}`}>
+                                                                        {(formData.rentalType === 'mingguan' ? [1, 2, 3, 4] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]).map(num => (
+                                                                            <div
+                                                                                key={num}
+                                                                                onClick={() => { setFormData({ ...formData, durationMultiplier: num }); setOpenDropdown(''); }}
+                                                                                className={`px-5 py-3 text-sm font-bold cursor-pointer flex items-center justify-between transition-colors ${formData.durationMultiplier === num ? 'text-[#C5A059]' : (isDark ? 'text-gray-300 hover:text-white' : 'text-slate-700 hover:text-slate-900')} hover:bg-[#C5A059]/10`}
+                                                                            >
+                                                                                {num} {formData.rentalType === 'mingguan' ? 'Minggu' : 'Bulan'}
+                                                                                {formData.durationMultiplier === num && <CheckCircle2 className="w-4 h-4 text-[#C5A059]" />}
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                )}
 
                                                 <div
                                                     onClick={() => setFormData({ ...formData, withDriver: !formData.withDriver })}
@@ -559,8 +654,14 @@ export default function CarDetail() {
                                             <div className={`${isDark ? 'bg-[#0a0a0a] p-6 rounded-3xl mt-6 border border-neutral-800 text-left' : 'bg-slate-50 p-6 rounded-3xl mt-6 border border-slate-200 text-left'}`}>
                                                 <div className="flex justify-between items-center mb-1">
                                                     <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Sewa ({rentalDays} Hari)</span>
-                                                    <span className={`${isDark ? 'text-xs font-bold text-white' : 'text-xs font-bold text-slate-800'}`}>{formatPrice(car.pricePerDay * rentalDays)}</span>
+                                                    <span className={`${isDark ? 'text-xs font-bold text-white' : 'text-xs font-bold text-slate-800'}`}>{formatPrice(subTotalCar)}</span>
                                                 </div>
+                                                {discountAmount > 0 && (
+                                                    <div className="flex justify-between items-center mt-3">
+                                                        <span className="text-[10px] text-[#C5A059] font-bold uppercase tracking-[0.2em]">Diskon ({formData.rentalType})</span>
+                                                        <span className="text-xs font-bold text-[#C5A059]">- {formatPrice(discountAmount)}</span>
+                                                    </div>
+                                                )}
                                                 {depositCost > 0 && (
                                                     <div className="flex justify-between items-center mt-3">
                                                         <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-[0.2em]">Deposit</span>
@@ -568,7 +669,7 @@ export default function CarDetail() {
                                                     </div>
                                                 )}
                                                 {formData.withDriver && (
-                                                    <div className="flex justify-between items-center mb-3">
+                                                    <div className="flex justify-between items-center mb-3 mt-3">
                                                         <span className="text-[10px] text-[#C5A059] font-bold uppercase tracking-[0.2em]">Driver ({rentalDays} Hari)</span>
                                                         <span className="text-xs font-bold text-[#C5A059]">{formatPrice(driverCost)}</span>
                                                     </div>
