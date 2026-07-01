@@ -26,7 +26,7 @@ export default function Footer() {
                         <ul className="space-y-3">
                             {[
                                 { name: 'Beranda', href: '/' },
-                                { name: 'Katalog Mobil', href: '/katalog' },
+                                { name: 'Katalog Mobil', href: '/armada' },
                                 { name: 'Tentang Kami', href: '/tentang' },
                                 { name: 'Pusat Bantuan', href: '/kontak' }
                             ].map(item => (
