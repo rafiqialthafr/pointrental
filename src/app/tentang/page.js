@@ -58,7 +58,7 @@ export default function About() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                         {/* Visi */}
                         <div className={`rounded-2xl p-8 md:p-10 border shadow-2xl relative overflow-hidden ${isDark ? 'bg-gradient-to-br from-[#131825] to-[#0B0F19] border-[#C5A059]/20' : 'bg-white border-slate-200'}`}>
-                            <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-[60px]" />
+                            <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-[60px] pointer-events-none transform-gpu" />
                             <div className="relative z-10">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="w-10 h-10 rounded-xl bg-[#C5A059]/10 flex items-center justify-center">
@@ -74,7 +74,7 @@ export default function About() {
 
                         {/* Misi */}
                         <div className={`rounded-2xl p-8 md:p-10 border shadow-2xl relative overflow-hidden ${isDark ? 'bg-gradient-to-br from-[#131825] to-[#0B0F19] border-[#C5A059]/20' : 'bg-white border-slate-200'}`}>
-                            <div className="absolute bottom-0 right-0 w-32 h-32 rounded-full blur-[40px]" />
+                            <div className="absolute bottom-0 right-0 w-32 h-32 rounded-full blur-[40px] pointer-events-none transform-gpu" />
                             <div className="relative z-10">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="w-10 h-10 rounded-xl bg-[#C5A059]/10 flex items-center justify-center">
@@ -131,7 +131,7 @@ export default function About() {
             {/* ═══ CTA ═══ */}
             <section className="py-14 px-6 transition-colors" style={{ background: 'var(--theme-bg)' }}>
                 <div className={isDark ? 'max-w-6xl mx-auto relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0a0e1a] via-[#131831] to-[#0a0e1a] p-10 md:p-14 text-center' : 'max-w-6xl mx-auto relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#ffffff] via-[#e2e8f0] to-[#ffffff] p-10 md:p-14 text-center'}>
-                    <div className="absolute top-0 right-0 w-60 h-60 rounded-full bg-[#C5A059]/8 blur-[80px]" />
+                    <div className="absolute top-0 right-0 w-60 h-60 rounded-full bg-[#C5A059]/8 blur-[80px] pointer-events-none transform-gpu" />
                     <div className="relative z-10">
                         <h2 className={isDark ? 'text-3xl md:text-3xl font-bold text-white mb-3 tracking-tight' : 'text-2xl md:text-3xl font-bold text-black mb-3 tracking-tight'}>Siap Merasakan Kemewahan?</h2>
                         <p className={isDark ? 'text-gray-400 font-medium mb-8 max-w-md mx-auto text-sm' : 'text-gray-500 font-medium mb-8 max-w-md mx-auto text-sm'}>Jelajahi koleksi armada premium kami dan temukan kendaraan yang sempurna.</p>

@@ -36,7 +36,7 @@ export default function CarCard({ car }) {
     }[car.status] ?? car.status;
 
     return (
-        <div className="group border rounded-2xl overflow-hidden flex flex-col h-full hover:-translate-y-2 hover:shadow-2xl hover:border-[#C5A059]/40 transition-all duration-500"
+        <div className="group border rounded-2xl overflow-hidden flex flex-col h-full hover:-translate-y-2 hover:shadow-2xl hover:border-[#C5A059]/40 transition-all duration-500 transform-gpu"
             style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
             {/* Image */}
             <div className="relative h-52 overflow-hidden" style={{ background: 'var(--theme-bg)' }}>

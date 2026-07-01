@@ -106,7 +106,7 @@ export default function Contact() {
                                 href={item.href}
                                 target={item.href.startsWith('http') ? '_blank' : undefined}
                                 rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                                className="group p-6 rounded-2xl border hover:border-[#C5A059]/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-400"
+                                className="group p-6 rounded-2xl border hover:border-[#C5A059]/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-400 transform-gpu"
                                 style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
                             >
                                 <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-400 shadow-md`}>
@@ -205,7 +205,7 @@ export default function Contact() {
                         <div className="lg:col-span-2 space-y-4">
                             {/* Operating Hours */}
                             <div className="rounded-2xl p-7 relative overflow-hidden shadow-xl" style={{ background: 'var(--theme-bg-card)', color: 'var(--theme-text)' }}>
-                                <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-[#C5A059]/10 blur-[50px]" />
+                                <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-[#C5A059]/10 blur-[50px] pointer-events-none transform-gpu" />
                                 <div className="relative z-10">
                                     <div className="flex items-center gap-3 mb-5">
                                         <div className="w-9 h-9 rounded-lg bg-[#C5A059]/20 flex items-center justify-center">
@@ -249,7 +249,7 @@ export default function Contact() {
                             </div>
 
                             {/* Hotline */}
-                            <div className="rounded-2xl p-5 shadow-xl border border-[#C5A059]/20" style={{ background: isDark ? 'linear-gradient(to bottom right, #131825, #0B0F19)' : 'linear-gradient(to bottom right, #ffffff, #F8FAFC)' }}>
+                            <div className="rounded-2xl p-5 shadow-xl border border-[#C5A059]/20 transform-gpu" style={{ background: isDark ? 'linear-gradient(to bottom right, #131825, #0B0F19)' : 'linear-gradient(to bottom right, #ffffff, #F8FAFC)' }}>
                                 <div className="flex items-center gap-3 mb-3">
                                     <div className="w-10 h-10 rounded-xl bg-[#C5A059]/10 flex items-center justify-center">
                                         <Headphones className="w-5 h-5 text-[#C5A059]" />
@@ -272,7 +272,7 @@ export default function Contact() {
 
             {/* ═══ STATS ═══ */}
             <section className="py-16 relative overflow-hidden transition-colors -mt-[1px] z-20" style={{ background: 'var(--theme-bg)' }}>
-                <div className="absolute top-0 left-1/4 w-72 h-72 rounded-full bg-[#C5A059]/10 blur-[80px]" />
+                <div className="absolute top-0 left-1/4 w-72 h-72 rounded-full bg-[#C5A059]/10 blur-[80px] pointer-events-none transform-gpu" />
                 <div className="max-w-6xl mx-auto px-6 relative z-10">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         {[
@@ -282,7 +282,7 @@ export default function Contact() {
                             { ref: stats4.ref, count: stats4.count, suffix: '+', label: 'Kota', icon: <Globe className="w-5 h-5" /> },
                         ].map((stat, i) => (
                             <div key={i} ref={stat.ref}
-                                className="text-center p-6 rounded-2xl border transition-all duration-500 hover:shadow-lg group"
+                                className="text-center p-6 rounded-2xl border transition-all duration-500 hover:shadow-lg group transform-gpu"
                                 style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
                                 <div className="w-10 h-10 rounded-xl bg-[#C5A059]/10 flex items-center justify-center mx-auto mb-3 text-[#C5A059] group-hover:scale-110 transition-transform">
                                     {stat.icon}
@@ -324,7 +324,7 @@ export default function Contact() {
 function FAQItem({ question, answer, isDark }) {
     const [isOpen, setIsOpen] = useState(false);
     return (
-        <div className={`rounded-xl border transition-all duration-300 overflow-hidden ${isOpen ? 'border-[#C5A059]/40 shadow-xl' : 'hover:border-[#C5A059]/20 shadow-sm'}`}
+        <div className={`rounded-xl border transition-all duration-300 overflow-hidden transform-gpu ${isOpen ? 'border-[#C5A059]/40 shadow-xl' : 'hover:border-[#C5A059]/20 shadow-sm'}`}
             style={{ background: 'var(--theme-bg-card)', borderColor: isOpen ? '#C5A059' : 'var(--theme-border)' }}>
             <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between p-5 text-left">
                 <span className="font-bold text-sm pr-4 transition-colors" style={{ color: isOpen ? '#C5A059' : 'var(--theme-text)' }}>{question}</span>
