@@ -91,8 +91,11 @@ export default function CarDetail() {
     const fetchRatings = async (carId) => {
         try {
             const res = await fetch(`/api/ratings?carId=${carId}`);
+            if (!res.ok) return;
             const data = await res.json();
-            setRatingsData(data);
+            if (data && Array.isArray(data.ratings)) {
+                setRatingsData(data);
+            }
         } catch (e) { console.error('Failed to fetch ratings', e); }
     };
 
@@ -398,70 +401,78 @@ export default function CarDetail() {
                                         </h3>
 
                                         {/* Average Rating Display */}
-                                        <div className={`${isDark ? 'bg-[#0a0a0a] p-6 sm:p-8 rounded-3xl border border-neutral-900 mb-8' : 'bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200 mb-8'}`}>
-                                            <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
-                                                <div className="text-center w-full md:w-auto">
-                                                    <p className="text-5xl font-black text-[#C5A059]">{displayRating}</p>
-                                                    <div className="flex gap-1 mt-2 justify-center">
-                                                        {[1, 2, 3, 4, 5].map(s => (
-                                                            <Star key={s} className={`w-4 h-4 ${s <= Math.round(displayRating) ? 'fill-[#C5A059] text-[#C5A059]' : 'text-neutral-700'}`} />
-                                                        ))}
-                                                    </div>
-                                                    <p className="text-[10px] text-gray-500 font-bold mt-2 uppercase tracking-widest">{ratingsData.total} Ulasan</p>
-                                                </div>
-                                                <div className="flex-1 w-full space-y-2">
-                                                    {[5, 4, 3, 2, 1].map(level => {
-                                                        const count = ratingsData.ratings.filter(r => r.score === level).length;
-                                                        const pct = ratingsData.total > 0 ? (count / ratingsData.total) * 100 : 0;
-                                                        return (
-                                                            <div key={level} className="flex items-center gap-3">
-                                                                <span className="text-[10px] font-bold text-gray-500 w-3">{level}</span>
-                                                                <Star className="w-3 h-3 fill-[#C5A059] text-[#C5A059]" />
-                                                                <div className={`flex-1 h-2 rounded-full overflow-hidden ${isDark ? 'bg-neutral-800' : 'bg-slate-200'}`}>
-                                                                    <div className="h-full bg-[#C5A059] rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                                        {(() => {
+                                            const safeRatings = Array.isArray(ratingsData?.ratings) ? ratingsData.ratings : [];
+                                            const totalRatings = typeof ratingsData?.total === 'number' ? ratingsData.total : 0;
+                                            return (
+                                                <>
+                                                    <div className={`${isDark ? 'bg-[#0a0a0a] p-6 sm:p-8 rounded-3xl border border-neutral-900 mb-8' : 'bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200 mb-8'}`}>
+                                                        <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
+                                                            <div className="text-center w-full md:w-auto">
+                                                                <p className="text-5xl font-black text-[#C5A059]">{displayRating}</p>
+                                                                <div className="flex gap-1 mt-2 justify-center">
+                                                                    {[1, 2, 3, 4, 5].map(s => (
+                                                                        <Star key={s} className={`w-4 h-4 ${s <= Math.round(displayRating) ? 'fill-[#C5A059] text-[#C5A059]' : 'text-neutral-700'}`} />
+                                                                    ))}
                                                                 </div>
-                                                                <span className="text-[10px] font-bold text-gray-600 w-5 text-right">{count}</span>
+                                                                <p className="text-[10px] text-gray-500 font-bold mt-2 uppercase tracking-widest">{totalRatings} Ulasan</p>
                                                             </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Review List */}
-                                        {ratingsData.ratings.length > 0 && (
-                                            <div className="space-y-4 mb-8">
-                                                {ratingsData.ratings.slice().reverse().slice(0, 5).map(r => (
-                                                    <div key={r.id} className={`${isDark ? 'bg-[#0a0a0a] p-6 rounded-2xl border border-neutral-900' : 'bg-[#F4F7FE] p-6 rounded-2xl border border-neutral-900'}`}>
-                                                        <div className="flex items-center justify-between mb-3">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-9 h-9 rounded-full bg-[#C5A059]/20 flex items-center justify-center">
-                                                                    <span className="text-sm font-black text-[#C5A059]">{r.name.charAt(0).toUpperCase()}</span>
-                                                                </div>
-                                                                <div>
-                                                                    <p className={`${isDark ? 'text-sm font-bold text-white' : 'text-sm font-bold text-slate-800'}`}>{r.name}</p>
-                                                                    <p className="text-[10px] text-gray-600">{new Date(r.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex gap-0.5">
-                                                                {[1, 2, 3, 4, 5].map(s => (
-                                                                    <Star key={s} className={`w-3.5 h-3.5 ${s <= r.score ? 'fill-[#C5A059] text-[#C5A059]' : 'text-neutral-700'}`} />
-                                                                ))}
+                                                            <div className="flex-1 w-full space-y-2">
+                                                                {[5, 4, 3, 2, 1].map(level => {
+                                                                    const count = safeRatings.filter(r => r.score === level).length;
+                                                                    const pct = totalRatings > 0 ? (count / totalRatings) * 100 : 0;
+                                                                    return (
+                                                                        <div key={level} className="flex items-center gap-3">
+                                                                            <span className="text-[10px] font-bold text-gray-500 w-3">{level}</span>
+                                                                            <Star className="w-3 h-3 fill-[#C5A059] text-[#C5A059]" />
+                                                                            <div className={`flex-1 h-2 rounded-full overflow-hidden ${isDark ? 'bg-neutral-800' : 'bg-slate-200'}`}>
+                                                                                <div className="h-full bg-[#C5A059] rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                                                                            </div>
+                                                                            <span className="text-[10px] font-bold text-gray-600 w-5 text-right">{count}</span>
+                                                                        </div>
+                                                                    );
+                                                                })}
                                                             </div>
                                                         </div>
-                                                        {r.review && <p className={`${isDark ? 'text-sm text-gray-400 leading-relaxed' : 'text-sm text-slate-500 leading-relaxed'}`}>{r.review}</p>}
                                                     </div>
-                                                ))}
-                                                {ratingsData.total > 5 && (
-                                                    <Link
-                                                        href={`/cars/${car.id}/ratings`}
-                                                        className={`${isDark ? 'block text-center py-4 bg-[#0a0a0a] border border-neutral-800 rounded-2xl text-sm font-bold text-[#C5A059] hover:bg-[#111] transition-all' : 'block text-center py-4 bg-[#F4F7FE] border border-neutral-800 rounded-2xl text-sm font-bold text-[#C5A059] hover:bg-[#111] transition-all'}`}
-                                                    >
-                                                        Lihat Semua Ulasan →
-                                                    </Link>
-                                                )}
-                                            </div>
-                                        )}
+
+                                                    {/* Review List */}
+                                                    {safeRatings.length > 0 && (
+                                                        <div className="space-y-4 mb-8">
+                                                            {safeRatings.slice().reverse().slice(0, 5).map(r => (
+                                                                <div key={r.id} className={`${isDark ? 'bg-[#0a0a0a] p-6 rounded-2xl border border-neutral-900' : 'bg-[#F4F7FE] p-6 rounded-2xl border border-neutral-900'}`}>
+                                                                    <div className="flex items-center justify-between mb-3">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <div className="w-9 h-9 rounded-full bg-[#C5A059]/20 flex items-center justify-center">
+                                                                                <span className="text-sm font-black text-[#C5A059]">{r.name.charAt(0).toUpperCase()}</span>
+                                                                            </div>
+                                                                            <div>
+                                                                                <p className={`${isDark ? 'text-sm font-bold text-white' : 'text-sm font-bold text-slate-800'}`}>{r.name}</p>
+                                                                                <p className="text-[10px] text-gray-600">{new Date(r.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex gap-0.5">
+                                                                            {[1, 2, 3, 4, 5].map(s => (
+                                                                                <Star key={s} className={`w-3.5 h-3.5 ${s <= r.score ? 'fill-[#C5A059] text-[#C5A059]' : 'text-neutral-700'}`} />
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                    {r.review && <p className={`${isDark ? 'text-sm text-gray-400 leading-relaxed' : 'text-sm text-slate-500 leading-relaxed'}`}>{r.review}</p>}
+                                                                </div>
+                                                            ))}
+                                                            {totalRatings > 5 && (
+                                                                <Link
+                                                                    href={`/cars/${car.id}/ratings`}
+                                                                    className={`${isDark ? 'block text-center py-4 bg-[#0a0a0a] border border-neutral-800 rounded-2xl text-sm font-bold text-[#C5A059] hover:bg-[#111] transition-all' : 'block text-center py-4 bg-[#F4F7FE] border border-neutral-800 rounded-2xl text-sm font-bold text-[#C5A059] hover:bg-[#111] transition-all'}`}
+                                                                >
+                                                                    Lihat Semua Ulasan →
+                                                                </Link>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            );
+                                        })()}
 
                                         {/* Submit Rating Form */}
                                         <div className={`${isDark ? 'bg-[#0a0a0a] p-8 rounded-3xl border border-neutral-900' : 'bg-[#F4F7FE] p-8 rounded-3xl border border-neutral-900'}`}>

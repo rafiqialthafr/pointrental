@@ -25,8 +25,11 @@ export default function RatingsPage() {
     const fetchRatings = async (carId) => {
         try {
             const res = await fetch(`/api/ratings?carId=${carId}`);
+            if (!res.ok) return;
             const data = await res.json();
-            setRatingsData(data);
+            if (data && Array.isArray(data.ratings)) {
+                setRatingsData(data);
+            }
         } catch (e) { console.error(e); }
     };
 
@@ -54,13 +57,16 @@ export default function RatingsPage() {
         finally { setSubmittingRating(false); }
     };
 
-    const displayRating = ratingsData.total > 0 ? ratingsData.average : (car?.rating || 0);
+    const displayRating = (ratingsData?.total > 0 && typeof ratingsData?.average === 'number') ? ratingsData.average : (car?.rating || 0);
 
     if (!car) return (
         <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
             <Loader2 className="w-10 h-10 animate-spin text-[#C5A059]" />
         </div>
     );
+
+    const safeRatings = Array.isArray(ratingsData?.ratings) ? ratingsData.ratings : [];
+    const totalRatings = typeof ratingsData?.total === 'number' ? ratingsData.total : 0;
 
     return (
         <main className="min-h-screen bg-[#0a0a0a] flex flex-col font-sans selection:bg-[#C5A059]/30">
@@ -101,12 +107,12 @@ export default function RatingsPage() {
                                         <Star key={s} className={`w-5 h-5 ${s <= Math.round(displayRating) ? 'fill-[#C5A059] text-[#C5A059]' : 'text-neutral-700'}`} />
                                     ))}
                                 </div>
-                                <p className="text-[10px] text-gray-500 font-bold mt-3 uppercase tracking-widest">{ratingsData.total} Ulasan</p>
+                                <p className="text-[10px] text-gray-500 font-bold mt-3 uppercase tracking-widest">{totalRatings} Ulasan</p>
                             </div>
                             <div className="flex-1 space-y-2">
                                 {[5, 4, 3, 2, 1].map(level => {
-                                    const count = ratingsData.ratings.filter(r => r.score === level).length;
-                                    const pct = ratingsData.total > 0 ? (count / ratingsData.total) * 100 : 0;
+                                    const count = safeRatings.filter(r => r.score === level).length;
+                                    const pct = totalRatings > 0 ? (count / totalRatings) * 100 : 0;
                                     return (
                                         <div key={level} className="flex items-center gap-3">
                                             <span className="text-[10px] font-bold text-gray-500 w-3">{level}</span>
@@ -124,14 +130,14 @@ export default function RatingsPage() {
 
                     {/* All Reviews */}
                     <div className="space-y-4 mb-10">
-                        <h2 className="text-lg font-black text-white mb-4">Semua Ulasan ({ratingsData.total})</h2>
-                        {ratingsData.ratings.length === 0 && (
+                        <h2 className="text-lg font-black text-white mb-4">Semua Ulasan ({totalRatings})</h2>
+                        {safeRatings.length === 0 && (
                             <div className="bg-[#0B0F19] rounded-2xl p-10 border border-neutral-900 text-center">
                                 <Star className="w-10 h-10 text-neutral-800 mx-auto mb-4" />
                                 <p className="text-sm text-gray-500 font-bold">Belum ada ulasan untuk armada ini.</p>
                             </div>
                         )}
-                        {ratingsData.ratings.slice().reverse().map(r => (
+                        {safeRatings.slice().reverse().map(r => (
                             <div key={r.id} className="bg-[#0B0F19] p-6 rounded-2xl border border-neutral-900">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-3">
