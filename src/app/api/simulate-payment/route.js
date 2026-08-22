@@ -39,12 +39,14 @@ export async function POST(request) {
         const statusData = await statusRes.json();
         console.log('[Simulate] Transaction status:', JSON.stringify(statusData, null, 2));
 
-        // Kalau sudah settlement, ga perlu simulate lagi, langsung paksa Supabase UPDATE ke PAID
+        // Kalau sudah settlement, ga perlu simulate lagi
         if (statusData.transaction_status === 'settlement' || statusData.transaction_status === 'capture') {
-            await supabase
-                .from('bookings')
-                .update({ status: 'PAID', updatedAt: new Date().toISOString() })
-                .eq('midtransOrderId', orderId);
+            try {
+                await supabase
+                    .from('bookings')
+                    .update({ status: 'PAID', updatedAt: new Date().toISOString() })
+                    .eq('midtransOrderId', orderId);
+            } catch (e) { }
             return NextResponse.json({ success: true, message: 'Already settled', status: statusData.transaction_status });
         }
 
@@ -92,16 +94,18 @@ export async function POST(request) {
             });
         }
 
-        // Simulate berhasil - UPDATE SUPABASE LANGSUNG KARENA WEBHOOK GA BISA NGEHIT LOCALHOST
+        // Simulate berhasil
         if (simulateResult.success) {
-            await supabase
-                .from('bookings')
-                .update({
-                    status: 'PAID',
-                    updatedAt: new Date().toISOString()
-                })
-                .eq('midtransOrderId', orderId);
-            console.log(`[Simulate] Berhasil auto-update status ${orderId} ke PAID di Supabase`);
+            try {
+                await supabase
+                    .from('bookings')
+                    .update({
+                        status: 'PAID',
+                        updatedAt: new Date().toISOString()
+                    })
+                    .eq('midtransOrderId', orderId);
+            } catch (e) { }
+            console.log(`[Simulate] Berhasil auto-update status ${orderId} ke PAID`);
         }
 
         return NextResponse.json({
