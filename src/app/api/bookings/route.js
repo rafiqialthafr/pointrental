@@ -1,22 +1,52 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseOnline } from '@/lib/supabase';
+import fs from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
-const fallbackBookings = [];
+const jsonPath = path.join(process.cwd(), 'src', 'data', 'rentals.json');
+
+function getLocalBookings() {
+    try {
+        if (fs.existsSync(jsonPath)) {
+            const raw = fs.readFileSync(jsonPath, 'utf8');
+            const data = JSON.parse(raw);
+            if (Array.isArray(data)) return data;
+        }
+    } catch (e) {
+        console.error('Error reading rentals.json:', e.message);
+    }
+    return [];
+}
+
+function saveLocalBookings(bookings) {
+    try {
+        fs.writeFileSync(jsonPath, JSON.stringify(bookings, null, 2), 'utf8');
+    } catch (e) {
+        console.error('Error writing rentals.json:', e.message);
+    }
+}
 
 export async function GET() {
-    try {
-        const { data, error } = await supabase
-            .from('bookings')
-            .select('*')
-            .order('createdAt', { ascending: false });
+    const online = await isSupabaseOnline();
+    if (online) {
+        try {
+            const { data, error } = await supabase
+                .from('bookings')
+                .select('*')
+                .order('createdAt', { ascending: false });
 
-        if (error || !data) return NextResponse.json(fallbackBookings);
-        return NextResponse.json(data);
-    } catch (err) {
-        return NextResponse.json(fallbackBookings);
+            if (!error && data && data.length > 0) {
+                return NextResponse.json(data);
+            }
+        } catch (err) {
+            console.warn('[Supabase GET Bookings Warning]', err.message);
+        }
     }
+
+    const localBookings = getLocalBookings();
+    return NextResponse.json(localBookings);
 }
 
 export async function POST(req) {
@@ -26,28 +56,35 @@ export async function POST(req) {
         const newBooking = {
             id: `INV-${Date.now()}`,
             ...body,
-            status: 'PENDING_PAYMENT',
+            status: body.status || 'PENDING_PAYMENT',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
 
-        try {
-            const { error } = await supabase
-                .from('bookings')
-                .insert([newBooking]);
+        const online = await isSupabaseOnline();
+        if (online) {
+            try {
+                const { error } = await supabase
+                    .from('bookings')
+                    .insert([newBooking]);
 
-            if (error) {
-                console.warn('[Supabase Insert Warning]', error.message);
+                if (error) {
+                    console.warn('[Supabase Insert Warning]', error.message);
+                }
+            } catch (dbErr) {
+                console.warn('[Supabase Unreachable - Using Local Storage]', dbErr.message);
             }
-        } catch (dbErr) {
-            console.warn('[Supabase Unreachable - Using Fallback]', dbErr.message);
         }
 
-        fallbackBookings.unshift(newBooking);
+        // Save to rentals.json file permanently
+        const currentLocal = getLocalBookings();
+        currentLocal.unshift(newBooking);
+        saveLocalBookings(currentLocal);
 
         return NextResponse.json({ success: true, booking: newBooking });
     } catch (error) {
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }
+
 

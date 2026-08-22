@@ -55,12 +55,20 @@ export default function CarDetail() {
                 const data = await res.json();
                 if (data.status === 'PAID') {
                     clearInterval(pollingRef.current);
+
+                    // Sync status ke backend & storage lokal secara eksplisit
+                    await fetch(`/api/bookings/${bookingId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'PAID', midtransOrderId: orderId, paymentType: data.paymentType || 'MIDTRANS' })
+                    }).catch(e => console.error('Failed to sync booking paid status:', e));
+
                     setSuccessData({ bookingId, orderId, status: 'paid' });
                 }
             } catch (e) {
                 console.error('[Polling] Gagal cek status:', e);
             }
-        }, 5000);
+        }, 3000);
     };
 
     // Rating states

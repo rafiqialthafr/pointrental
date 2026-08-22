@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
     LayoutDashboard, Car, CreditCard, FileText, Settings, LogOut,
     ExternalLink, CheckCircle, Clock, XCircle, DollarSign,
-    PieChart, Calendar as CalendarIcon, Edit, Trash2, Search, Banknote, X
+    PieChart, Calendar as CalendarIcon, Edit, Trash2, Search, Banknote, X, RotateCw
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -29,33 +29,55 @@ export default function AdminDashboard() {
     });
     const [imageFile, setImageFile] = useState(null);
 
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
     const fetchBookings = async () => {
         try {
             const res = await fetch('/api/bookings', { cache: 'no-store' });
+            if (!res.ok) return;
             const data = await res.json();
-            setBookings(data);
+            const safeBookings = Array.isArray(data) ? data : [];
+            setBookings(safeBookings);
 
-            const total = data.length;
-            const revenue = data
-                .filter(b => b.status === 'PAID')
-                .reduce((acc, curr) => acc + curr.totalPrice, 0);
-            const pending = data.filter(b => b.status === 'PENDING_PAYMENT').length;
-            const active = data.filter(b => b.status === 'PAID').length;
+            const total = safeBookings.length;
+            const revenue = safeBookings
+                .filter(b => {
+                    const st = (b.status || '').toUpperCase();
+                    return st === 'PAID' || st === 'SETTLEMENT';
+                })
+                .reduce((acc, curr) => acc + (curr.totalPrice || 0), 0);
+
+            const pending = safeBookings.filter(b => {
+                const st = (b.status || '').toUpperCase();
+                return st === 'PENDING' || st === 'PENDING_PAYMENT';
+            }).length;
+
+            const active = safeBookings.filter(b => {
+                const st = (b.status || '').toUpperCase();
+                return st === 'PAID' || st === 'SETTLEMENT';
+            }).length;
 
             setStats({ total, revenue, pending, active });
         } catch (error) {
-            console.error(error);
+            console.error('Fetch bookings error:', error);
         }
     };
 
     const fetchCars = async () => {
         try {
             const res = await fetch('/api/cars', { cache: 'no-store' });
+            if (!res.ok) return;
             const data = await res.json();
-            setCarsData(data);
+            setCarsData(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error(error);
+            console.error('Fetch cars error:', error);
         }
+    };
+
+    const handleManualRefresh = async () => {
+        setIsRefreshing(true);
+        await Promise.all([fetchBookings(), fetchCars()]);
+        setTimeout(() => setIsRefreshing(false), 500);
     };
 
     useEffect(() => {
@@ -72,6 +94,14 @@ export default function AdminDashboard() {
         const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         setCurrentDate(new Date().toLocaleDateString('id-ID', dateOptions));
         setLoading(false);
+
+        // Auto-refresh data live setiap 3 detik
+        const interval = setInterval(() => {
+            fetchBookings();
+            fetchCars();
+        }, 3000);
+
+        return () => clearInterval(interval);
     }, [router]);
 
     const handleLogout = () => {
@@ -158,15 +188,18 @@ export default function AdminDashboard() {
     if (!isAuth) return <div className="min-h-screen bg-[#F4F7FE]"></div>;
     if (loading) return <div className="min-h-screen bg-[#F4F7FE] flex items-center justify-center font-bold text-slate-500 font-sans">Memuat Portal Admin...</div>;
 
-    const recentActivity = bookings.slice(0, 10);
+    const safeBookingsList = Array.isArray(bookings) ? bookings : [];
+    const safeCarsList = Array.isArray(carsData) ? carsData : [];
 
-    const filteredBookings = bookings.filter(b =>
-        (b.customerName?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (b.id?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (b.carModel?.toLowerCase().includes(searchQuery.toLowerCase()))
+    const recentActivity = safeBookingsList.slice(0, 10);
+
+    const filteredBookings = safeBookingsList.filter(b =>
+        (b.customerName || b.userName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (b.id || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (b.carModel || b.carId || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const filteredCars = carsData.filter(c =>
+    const filteredCars = safeCarsList.filter(c =>
         (c.brand?.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (c.model?.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (c.type?.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -245,9 +278,12 @@ export default function AdminDashboard() {
                                 </div>
                                 <div className="space-y-4">
                                     {recentActivity.map((b) => {
-                                        const isPaid = b.status === 'PAID';
-                                        const isPending = b.status === 'PENDING_PAYMENT';
-                                        const isFailed = b.status === 'FAILED';
+                                        const st = (b.status || '').toUpperCase();
+                                        const isPaid = st === 'PAID' || st === 'SETTLEMENT';
+                                        const isPending = st === 'PENDING' || st === 'PENDING_PAYMENT';
+                                        const custName = b.customerName || b.userName || 'Pelanggan';
+                                        const carTitle = b.carModel || b.carId || 'Armada Mobil';
+
                                         return (
                                             <div key={b.id} className="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
                                                 <div className="flex items-center gap-4">
@@ -255,9 +291,9 @@ export default function AdminDashboard() {
                                                         {isPaid ? <CheckCircle className="w-6 h-6" /> : isPending ? <Clock className="w-6 h-6" /> : <XCircle className="w-6 h-6" />}
                                                     </div>
                                                     <div>
-                                                        <h5 className="font-bold text-base text-slate-800 mb-1 font-sans">{b.customerName} menyewa {b.carModel}</h5>
+                                                        <h5 className="font-bold text-base text-slate-800 mb-1 font-sans">{custName} menyewa {carTitle}</h5>
                                                         <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                                                            <CalendarIcon className="w-4 h-4" /> {new Date(b.createdAt).toLocaleDateString('id-ID')}
+                                                            <CalendarIcon className="w-4 h-4" /> {new Date(b.createdAt || Date.now()).toLocaleDateString('id-ID')}
                                                             <span>•</span>
                                                             <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] uppercase ${isPaid ? 'bg-emerald-100 text-emerald-700' : isPending ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
                                                                 {isPaid ? 'LUNAS' : isPending ? 'MENUNGGU' : 'GAGAL'}
@@ -266,7 +302,7 @@ export default function AdminDashboard() {
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-col items-end gap-2 shrink-0">
-                                                    <span className="font-bold text-lg text-slate-800">Rp {b.totalPrice?.toLocaleString('id-ID')}</span>
+                                                    <span className="font-bold text-lg text-slate-800">Rp {(b.totalPrice || 0).toLocaleString('id-ID')}</span>
                                                 </div>
                                             </div>
                                         );
@@ -347,39 +383,42 @@ export default function AdminDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
-                                    {filteredBookings.map(b => (
-                                        <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-6 py-4 font-bold text-slate-700 text-xs">{b.id}</td>
-                                            <td className="px-6 py-4">
-                                                <p className="font-bold text-slate-800">{b.customerName}</p>
-                                                <p className="text-xs text-slate-500 font-medium">{b.customerPhone}</p>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <p className="font-bold text-slate-700">{b.carModel}</p>
-                                                <p className="text-xs text-slate-500 font-medium">{b.days} Hari • {b.date}</p>
-                                            </td>
-                                            <td className="px-6 py-4 font-bold text-slate-800">Rp {b.totalPrice?.toLocaleString('id-ID')}</td>
-                                            <td className="px-6 py-4">
-                                                <div className="inline-block bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-md">
-                                                    <span className="text-xs font-bold text-slate-700 uppercase">{b.paymentType || 'MIDTRANS'}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                {(() => {
-                                                    const isPaid = b.status === 'PAID';
-                                                    const isPending = b.status === 'PENDING_PAYMENT';
-                                                    return (
-                                                        <span className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${isPaid ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
-                                                                isPending ? 'bg-amber-100 text-amber-700 border border-amber-200' :
-                                                                    'bg-red-100 text-red-700 border border-red-200'
-                                                            }`}>
-                                                            {isPaid ? 'LUNAS' : isPending ? 'MENUNGGU' : 'GAGAL'}
-                                                        </span>
-                                                    );
-                                                })()}
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {filteredBookings.map(b => {
+                                        const st = (b.status || '').toUpperCase();
+                                        const isPaid = st === 'PAID' || st === 'SETTLEMENT';
+                                        const isPending = st === 'PENDING' || st === 'PENDING_PAYMENT';
+                                        const custName = b.customerName || b.userName || 'Pelanggan';
+                                        const custPhone = b.customerPhone || b.userEmail || '-';
+                                        const carTitle = b.carModel || b.carId || 'Armada Mobil';
+
+                                        return (
+                                            <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
+                                                <td className="px-6 py-4 font-bold text-slate-700 text-xs">{b.id}</td>
+                                                <td className="px-6 py-4">
+                                                    <p className="font-bold text-slate-800">{custName}</p>
+                                                    <p className="text-xs text-slate-500 font-medium">{custPhone}</p>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <p className="font-bold text-slate-700">{carTitle}</p>
+                                                    <p className="text-xs text-slate-500 font-medium">{b.days || 1} Hari • {b.date || '-'}</p>
+                                                </td>
+                                                <td className="px-6 py-4 font-bold text-slate-800">Rp {(b.totalPrice || 0).toLocaleString('id-ID')}</td>
+                                                <td className="px-6 py-4">
+                                                    <div className="inline-block bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-md">
+                                                        <span className="text-xs font-bold text-slate-700 uppercase">{b.paymentType || 'MIDTRANS'}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <span className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${isPaid ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                                                        isPending ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                                                            'bg-red-100 text-red-700 border border-red-200'
+                                                        }`}>
+                                                        {isPaid ? 'LUNAS' : isPending ? 'MENUNGGU' : 'GAGAL'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                     {filteredBookings.length === 0 && (
                                         <tr><td colSpan={6} className="text-center py-12 text-slate-500 font-medium">Data transaksi tidak ditemukan.</td></tr>
                                     )}
@@ -509,7 +548,16 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={handleManualRefresh}
+                            className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all border border-slate-200"
+                            title="Refresh Data Terbaru"
+                        >
+                            <RotateCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-[#C5A059]' : ''}`} />
+                            <span className="hidden sm:inline">Refresh Data</span>
+                        </button>
+
                         {(activeTab === 'Data Armada' || activeTab === 'Booking & Transaksi') && (
                             <div className="hidden lg:flex items-center bg-slate-50 border border-slate-200 rounded-full px-4 py-2 hover:bg-white hover:border-[#C5A059]/40 transition-colors">
                                 <Search className="w-4 h-4 text-slate-400 mr-2" />

@@ -1,9 +1,36 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseOnline } from '@/lib/supabase';
+import fs from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
-// GET /api/booking-status?orderId=BOOK-XXXXXXXX
+const jsonPath = path.join(process.cwd(), 'src', 'data', 'rentals.json');
+
+function getLocalBookings() {
+    try {
+        if (fs.existsSync(jsonPath)) {
+            const raw = fs.readFileSync(jsonPath, 'utf8');
+            const data = JSON.parse(raw);
+            if (Array.isArray(data)) return data;
+        }
+    } catch (e) { }
+    return [];
+}
+
+function updateLocalStatus(orderId, newStatus, paymentType) {
+    try {
+        const bookings = getLocalBookings();
+        const index = bookings.findIndex(b => b.midtransOrderId === orderId || b.id === orderId);
+        if (index !== -1) {
+            bookings[index].status = newStatus;
+            if (paymentType) bookings[index].paymentType = paymentType;
+            bookings[index].updatedAt = new Date().toISOString();
+            fs.writeFileSync(jsonPath, JSON.stringify(bookings, null, 2), 'utf8');
+        }
+    } catch (e) { }
+}
+
 export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url);
@@ -16,23 +43,32 @@ export async function GET(request) {
         let currentStatus = 'PENDING_PAYMENT';
         let paymentType = 'MIDTRANS';
 
-        try {
-            const { data } = await supabase
-                .from('bookings')
-                .select('id, status, midtransOrderId, paymentType, updatedAt')
-                .eq('midtransOrderId', orderId)
-                .single();
+        const localBookings = getLocalBookings();
+        const foundLocal = localBookings.find(b => b.midtransOrderId === orderId || b.id === orderId);
 
-            if (data) {
-                currentStatus = data.status;
-                if (data.paymentType) paymentType = data.paymentType;
-            }
-        } catch (dbErr) {
-            console.warn('[Supabase Booking Status Fallback]', dbErr.message);
+        if (foundLocal) {
+            currentStatus = foundLocal.status;
+            if (foundLocal.paymentType) paymentType = foundLocal.paymentType;
         }
 
-        // [Mekanisme Fallback untuk Localhost/Sandbox]
-        // Jika di DB masih PENDING_PAYMENT, cek manual ke Midtrans Core API.
+        const online = await isSupabaseOnline();
+        if (online) {
+            try {
+                const { data } = await supabase
+                    .from('bookings')
+                    .select('id, status, midtransOrderId, paymentType, updatedAt')
+                    .eq('midtransOrderId', orderId)
+                    .single();
+
+                if (data) {
+                    currentStatus = data.status;
+                    if (data.paymentType) paymentType = data.paymentType;
+                }
+            } catch (dbErr) {
+                console.warn('[Supabase Booking Status Fallback]', dbErr.message);
+            }
+        }
+
         if (currentStatus === 'PENDING_PAYMENT') {
             const serverKey = (process.env.MIDTRANS_SERVER_KEY || '').trim();
             const authHeader = 'Basic ' + Buffer.from(serverKey + ':').toString('base64');
@@ -47,12 +83,17 @@ export async function GET(request) {
                     if (statusData.transaction_status === 'settlement' || statusData.transaction_status === 'capture') {
                         currentStatus = 'PAID';
                         if (statusData.payment_type) paymentType = statusData.payment_type;
-                        try {
-                            await supabase
-                                .from('bookings')
-                                .update({ status: 'PAID', updatedAt: new Date().toISOString() })
-                                .eq('midtransOrderId', orderId);
-                        } catch (e) { }
+
+                        updateLocalStatus(orderId, 'PAID', paymentType);
+
+                        if (online) {
+                            try {
+                                await supabase
+                                    .from('bookings')
+                                    .update({ status: 'PAID', updatedAt: new Date().toISOString() })
+                                    .eq('midtransOrderId', orderId);
+                            } catch (e) { }
+                        }
                     }
                 }
             } catch (midErr) {
@@ -65,4 +106,5 @@ export async function GET(request) {
         return NextResponse.json({ error: err.message }, { status: 500 });
     }
 }
+
 

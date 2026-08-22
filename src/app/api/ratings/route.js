@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseOnline } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,22 +11,25 @@ export async function GET(req) {
         const { searchParams } = new URL(req.url);
         const carId = searchParams.get('carId');
 
-        try {
-            let query = supabase.from('ratings').select('*').order('createdAt', { ascending: false });
-            if (carId) query = query.eq('carId', carId);
+        const online = await isSupabaseOnline();
+        if (online) {
+            try {
+                let query = supabase.from('ratings').select('*').order('createdAt', { ascending: false });
+                if (carId) query = query.eq('carId', carId);
 
-            const { data: ratings, error } = await query;
-            if (!error && ratings) {
-                if (carId) {
-                    const avg = ratings.length > 0
-                        ? Math.round((ratings.reduce((sum, r) => sum + r.score, 0) / ratings.length) * 10) / 10
-                        : 0;
-                    return NextResponse.json({ carId, average: avg, total: ratings.length, ratings });
+                const { data: ratings, error } = await query;
+                if (!error && ratings) {
+                    if (carId) {
+                        const avg = ratings.length > 0
+                            ? Math.round((ratings.reduce((sum, r) => sum + r.score, 0) / ratings.length) * 10) / 10
+                            : 0;
+                        return NextResponse.json({ carId, average: avg, total: ratings.length, ratings });
+                    }
+                    return NextResponse.json(ratings);
                 }
-                return NextResponse.json(ratings);
+            } catch (dbErr) {
+                console.warn('[Supabase Ratings GET Warning]', dbErr.message);
             }
-        } catch (dbErr) {
-            console.warn('[Supabase Ratings GET Warning]', dbErr.message);
         }
 
         if (carId) {
@@ -60,10 +63,13 @@ export async function POST(req) {
             createdAt: new Date().toISOString()
         };
 
-        try {
-            await supabase.from('ratings').insert([newRating]);
-        } catch (dbErr) {
-            console.warn('[Supabase Ratings POST Warning]', dbErr.message);
+        const online = await isSupabaseOnline();
+        if (online) {
+            try {
+                await supabase.from('ratings').insert([newRating]);
+            } catch (dbErr) {
+                console.warn('[Supabase Ratings POST Warning]', dbErr.message);
+            }
         }
 
         fallbackRatings.unshift(newRating);
