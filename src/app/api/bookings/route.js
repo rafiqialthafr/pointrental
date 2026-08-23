@@ -37,8 +37,11 @@ export async function GET() {
                 .select('*')
                 .order('createdAt', { ascending: false });
 
-            if (!error && data && data.length > 0) {
+            if (!error && data) {
                 return NextResponse.json(data);
+            }
+            if (error) {
+                console.error('[Supabase GET Error]', error.message);
             }
         } catch (err) {
             console.warn('[Supabase GET Bookings Warning]', err.message);
@@ -69,14 +72,14 @@ export async function POST(req) {
                     .insert([newBooking]);
 
                 if (error) {
-                    console.warn('[Supabase Insert Warning]', error.message);
+                    console.error('[Supabase Insert Error]', error.message);
                 }
             } catch (dbErr) {
                 console.warn('[Supabase Unreachable - Using Local Storage]', dbErr.message);
             }
         }
 
-        // Save to rentals.json file permanently
+        // Save to rentals.json file permanently (when running locally)
         const currentLocal = getLocalBookings();
         currentLocal.unshift(newBooking);
         saveLocalBookings(currentLocal);
