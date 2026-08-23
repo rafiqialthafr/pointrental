@@ -1,5 +1,21 @@
 [
   {
+    "id": "INV-1787452911758",
+    "customerName": "faa",
+    "customerEmail": "customer@pointrental.id",
+    "customerPhone": "082183201302",
+    "carId": "car_1",
+    "carModel": "Alphard HV Premium (Paket HARIAN)",
+    "date": "2026-08-23",
+    "days": 2,
+    "totalPrice": 10840000,
+    "status": "PENDING_PAYMENT",
+    "createdAt": "2026-08-23T02:41:51.758Z",
+    "updatedAt": "2026-08-23T02:43:09.156Z",
+    "midtransOrderId": "BOOK-1787452912484",
+    "paymentType": "BCA VA"
+  },
+  {
     "id": "INV-1787374318666",
     "customerName": "sd",
     "customerEmail": "customer@pointrental.id",
