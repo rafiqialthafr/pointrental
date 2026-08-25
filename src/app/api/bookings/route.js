@@ -97,4 +97,25 @@ export async function POST(req) {
     }
 }
 
+export async function DELETE() {
+    try {
+        const online = await isSupabaseOnline();
+        if (online) {
+            try {
+                await supabase
+                    .from('bookings')
+                    .delete()
+                    .neq('id', 'CLEAR_ALL_DUMMY_NEQ');
+            } catch (dbErr) {
+                console.warn('[Supabase DELETE ALL Warning]', dbErr.message);
+            }
+        }
+
+        saveLocalBookings([]);
+        return NextResponse.json({ success: true, message: 'All bookings deleted successfully' }, { headers: NO_CACHE_HEADERS });
+    } catch (error) {
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+}
+
 

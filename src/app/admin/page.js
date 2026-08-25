@@ -179,6 +179,26 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleDeleteBooking = async (id) => {
+        if (!confirm('Yakin ingin menghapus data booking ini?')) return;
+        try {
+            await fetch(`/api/bookings/${id}`, { method: 'DELETE' });
+            fetchBookings();
+        } catch (err) {
+            alert('Gagal menghapus booking');
+        }
+    };
+
+    const handleDeleteAllBookings = async () => {
+        if (!confirm('APAKAH ANDA YAKIN INGIN MENGHAPUS SEMUA DATA BOOKING?\n\nTindakan ini tidak bisa dibatalkan!')) return;
+        try {
+            await fetch('/api/bookings', { method: 'DELETE' });
+            fetchBookings();
+        } catch (err) {
+            alert('Gagal menghapus semua booking');
+        }
+    };
+
     const menuManajemen = [
         { name: 'Data Armada', icon: <Car className="w-5 h-5" /> },
         { name: 'Booking & Transaksi', icon: <CreditCard className="w-5 h-5" /> },
@@ -367,8 +387,16 @@ export default function AdminDashboard() {
             case 'Booking & Transaksi':
                 return (
                     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
+                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white flex-wrap gap-4">
                             <h3 className="text-xl font-bold text-slate-800 font-sans">Semua Booking & Transaksi</h3>
+                            {safeBookingsList.length > 0 && (
+                                <button
+                                    onClick={handleDeleteAllBookings}
+                                    className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm hover:shadow"
+                                >
+                                    <Trash2 className="w-4 h-4" /> Hapus Semua Data ({safeBookingsList.length})
+                                </button>
+                            )}
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
@@ -409,12 +437,21 @@ export default function AdminDashboard() {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <span className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${isPaid ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
-                                                        isPending ? 'bg-amber-100 text-amber-700 border border-amber-200' :
-                                                            'bg-red-100 text-red-700 border border-red-200'
-                                                        }`}>
-                                                        {isPaid ? 'LUNAS' : isPending ? 'MENUNGGU' : 'GAGAL'}
-                                                    </span>
+                                                    <div className="flex items-center justify-end gap-3">
+                                                        <span className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${isPaid ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                                                            isPending ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                                                                'bg-red-100 text-red-700 border border-red-200'
+                                                            }`}>
+                                                            {isPaid ? 'LUNAS' : isPending ? 'MENUNGGU' : 'GAGAL'}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => handleDeleteBooking(b.id)}
+                                                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                            title="Hapus Data Booking Ini"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         );
@@ -549,15 +586,6 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <button
-                            onClick={handleManualRefresh}
-                            className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all border border-slate-200"
-                            title="Refresh Data Terbaru"
-                        >
-                            <RotateCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-[#C5A059]' : ''}`} />
-                            <span className="hidden sm:inline">Refresh Data</span>
-                        </button>
-
                         {(activeTab === 'Data Armada' || activeTab === 'Booking & Transaksi') && (
                             <div className="hidden lg:flex items-center bg-slate-50 border border-slate-200 rounded-full px-4 py-2 hover:bg-white hover:border-[#C5A059]/40 transition-colors">
                                 <Search className="w-4 h-4 text-slate-400 mr-2" />

@@ -4,6 +4,13 @@ import fs from 'fs';
 import path from 'path';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const NO_CACHE_HEADERS = {
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+};
 
 const jsonPath = path.join(process.cwd(), 'src', 'data', 'rentals.json');
 
@@ -41,17 +48,17 @@ export async function GET(req, context) {
                     .eq('id', id)
                     .single();
 
-                if (!error && data) return NextResponse.json(data);
+                if (!error && data) return NextResponse.json(data, { headers: NO_CACHE_HEADERS });
             } catch (dbErr) { }
         }
 
         const localBookings = getLocalBookings();
         const found = localBookings.find(b => b.id === id || b.midtransOrderId === id);
-        if (found) return NextResponse.json(found);
+        if (found) return NextResponse.json(found, { headers: NO_CACHE_HEADERS });
 
-        return NextResponse.json({ error: 'Not found' }, { status: 404 });
+        return NextResponse.json({ error: 'Not found' }, { status: 404, headers: NO_CACHE_HEADERS });
     } catch (err) {
-        return NextResponse.json({ error: 'Not found' }, { status: 404 });
+        return NextResponse.json({ error: 'Not found' }, { status: 404, headers: NO_CACHE_HEADERS });
     }
 }
 
@@ -97,7 +104,33 @@ export async function PATCH(req, context) {
             saveLocalBookings(localBookings);
         }
 
-        return NextResponse.json({ success: true, booking: updatedBooking });
+        return NextResponse.json({ success: true, booking: updatedBooking }, { headers: NO_CACHE_HEADERS });
+    } catch (err) {
+        return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    }
+}
+
+export async function DELETE(req, context) {
+    try {
+        const { id } = await context.params;
+
+        const online = await isSupabaseOnline();
+        if (online) {
+            try {
+                await supabase
+                    .from('bookings')
+                    .delete()
+                    .eq('id', id);
+            } catch (dbErr) {
+                console.warn('[Supabase DELETE Warning]', dbErr.message);
+            }
+        }
+
+        const localBookings = getLocalBookings();
+        const filtered = localBookings.filter(b => b.id !== id && b.midtransOrderId !== id);
+        saveLocalBookings(filtered);
+
+        return NextResponse.json({ success: true, message: 'Booking deleted successfully' }, { headers: NO_CACHE_HEADERS });
     } catch (err) {
         return NextResponse.json({ success: false, error: err.message }, { status: 500 });
     }
