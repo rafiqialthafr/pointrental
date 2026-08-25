@@ -13,21 +13,14 @@ export const supabase = isValidConfig
     ? createClient(supabaseUrl, supabaseKey)
     : createClient('https://placeholder.supabase.co', 'placeholder');
 
-// Cek koneksi Supabase SEKALI saja dengan timeout 3 detik
+// Cek koneksi Supabase SEKALI saja dengan query ringan
 async function checkOnline() {
     if (_isOnline !== null) return _isOnline;
     if (!isValidConfig) { _isOnline = false; return false; }
 
     try {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 3000);
-        const res = await fetch(`${supabaseUrl}/rest/v1/`, {
-            method: 'HEAD',
-            headers: { 'apikey': supabaseKey },
-            signal: controller.signal
-        });
-        clearTimeout(timer);
-        _isOnline = res.ok || res.status === 400; // 400 = reachable tapi butuh query
+        const { error } = await supabase.from('bookings').select('id').limit(1);
+        _isOnline = !error;
     } catch (e) {
         _isOnline = false;
     }
