@@ -43,12 +43,9 @@ export default function AdminDashboard() {
             const revenue = safeBookings
                 .filter(b => {
                     const st = (b.status || '').toUpperCase();
-                    return st !== 'CANCEL' && st !== 'FAILED' && st !== 'DENY' && st !== 'EXPIRE';
+                    return st === 'PAID' || st === 'SETTLEMENT';
                 })
-                .reduce((acc, curr) => {
-                    const val = Number(curr.totalPrice || curr.total_price || curr.total || curr.gross_amount || 0);
-                    return acc + (isNaN(val) ? 0 : val);
-                }, 0);
+                .reduce((acc, curr) => acc + (curr.totalPrice || 0), 0);
 
             const pending = safeBookings.filter(b => {
                 const st = (b.status || '').toUpperCase();
@@ -57,7 +54,7 @@ export default function AdminDashboard() {
 
             const active = safeBookings.filter(b => {
                 const st = (b.status || '').toUpperCase();
-                return st === 'PAID' || st === 'SETTLEMENT' || st === 'VERIFIED' || st === 'SUCCESS' || st === 'LUNAS';
+                return st === 'PAID' || st === 'SETTLEMENT';
             }).length;
 
             setStats({ total, revenue, pending, active });
@@ -440,16 +437,7 @@ export default function AdminDashboard() {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <div className="flex items-center justify-end gap-2.5">
-                                                        {isPending && (
-                                                            <button
-                                                                onClick={() => handleForcePaid(b.id)}
-                                                                className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 shadow-sm"
-                                                                title="Tandai pesanan ini LUNAS"
-                                                            >
-                                                                <CheckCircle className="w-3.5 h-3.5" /> Set Lunas
-                                                            </button>
-                                                        )}
+                                                    <div className="flex items-center justify-end gap-3">
                                                         <span className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${isPaid ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
                                                             isPending ? 'bg-amber-100 text-amber-700 border border-amber-200' :
                                                                 'bg-red-100 text-red-700 border border-red-200'
