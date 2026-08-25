@@ -98,11 +98,8 @@ export async function PATCH(req, context) {
             };
             updatedBooking = localBookings[index];
             saveLocalBookings(localBookings);
-        } else {
-            updatedBooking = { id, ...body, updatedAt: new Date().toISOString() };
-            localBookings.unshift(updatedBooking);
-            saveLocalBookings(localBookings);
         }
+        // JANGAN buat record baru jika tidak ditemukan — webhook bisa trigger ini
 
         return NextResponse.json({ success: true, booking: updatedBooking }, { headers: NO_CACHE_HEADERS });
     } catch (err) {
