@@ -33,7 +33,7 @@ export default function AdminDashboard() {
 
     const fetchBookings = async () => {
         try {
-            const res = await fetch('/api/bookings', { cache: 'no-store' });
+            const res = await fetch(`/api/bookings?t=${Date.now()}`, { cache: 'no-store' });
             if (!res.ok) return;
             const data = await res.json();
             const safeBookings = Array.isArray(data) ? data : [];
@@ -65,7 +65,7 @@ export default function AdminDashboard() {
 
     const fetchCars = async () => {
         try {
-            const res = await fetch('/api/cars', { cache: 'no-store' });
+            const res = await fetch(`/api/cars?t=${Date.now()}`, { cache: 'no-store' });
             if (!res.ok) return;
             const data = await res.json();
             setCarsData(Array.isArray(data) ? data : []);

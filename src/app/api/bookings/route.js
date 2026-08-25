@@ -4,6 +4,13 @@ import fs from 'fs';
 import path from 'path';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const NO_CACHE_HEADERS = {
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+};
 
 const jsonPath = path.join(process.cwd(), 'src', 'data', 'rentals.json');
 
@@ -38,7 +45,7 @@ export async function GET() {
                 .order('createdAt', { ascending: false });
 
             if (!error && data) {
-                return NextResponse.json(data);
+                return NextResponse.json(data, { headers: NO_CACHE_HEADERS });
             }
             if (error) {
                 console.error('[Supabase GET Error]', error.message);
@@ -49,7 +56,7 @@ export async function GET() {
     }
 
     const localBookings = getLocalBookings();
-    return NextResponse.json(localBookings);
+    return NextResponse.json(localBookings, { headers: NO_CACHE_HEADERS });
 }
 
 export async function POST(req) {
@@ -84,7 +91,7 @@ export async function POST(req) {
         currentLocal.unshift(newBooking);
         saveLocalBookings(currentLocal);
 
-        return NextResponse.json({ success: true, booking: newBooking });
+        return NextResponse.json({ success: true, booking: newBooking }, { headers: NO_CACHE_HEADERS });
     } catch (error) {
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }

@@ -2,6 +2,15 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const NO_CACHE_HEADERS = {
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+};
+
 const dbPath = path.join(process.cwd(), 'src/data/cars.json');
 
 function getCars() {
@@ -18,7 +27,7 @@ function saveCars(cars) {
 }
 
 export async function GET() {
-    return NextResponse.json(getCars());
+    return NextResponse.json(getCars(), { headers: NO_CACHE_HEADERS });
 }
 
 export async function POST(req) {

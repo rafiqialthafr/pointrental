@@ -1,5 +1,21 @@
 [
   {
+    "id": "INV-1787630345719",
+    "customerName": "jak",
+    "customerEmail": "customer@pointrental.id",
+    "customerPhone": "0812830704",
+    "carId": "car_2",
+    "carModel": "Fortuner Legender (Paket HARIAN)",
+    "date": "2026-09-25",
+    "days": 2,
+    "totalPrice": 3900000,
+    "status": "PENDING_PAYMENT",
+    "createdAt": "2026-08-25T03:59:05.719Z",
+    "updatedAt": "2026-08-25T03:59:12.517Z",
+    "midtransOrderId": "BOOK-1787630346390",
+    "paymentType": "BCA VA"
+  },
+  {
     "id": "INV-1787629957134",
     "customerName": "llavf",
     "customerEmail": "customer@pointrental.id",
