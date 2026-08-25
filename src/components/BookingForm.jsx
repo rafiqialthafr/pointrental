@@ -86,19 +86,23 @@ export default function BookingForm({ car }) {
                 }
             }, 3000);
 
+            let paymentChosen = false;
+
             window.snap.pay(data.token, {
                 onSuccess: function (result) {
                     clearInterval(simInterval);
                     paymentCompleted = true;
+                    paymentChosen = true;
                 },
                 onPending: function (result) {
                     // Di sandbox, VA/QRIS/e-wallet selalu masuk sini
                     paymentCompleted = true;
+                    paymentChosen = true;
                 },
                 onError: function (result) {
                     clearInterval(simInterval);
                     setError('Pembayaran gagal. Silakan coba metode lain.');
-                    setIsSubmitting(false);
+                    setIsProcessing(false);
                 },
                 onClose: function () {
                     clearInterval(simInterval);

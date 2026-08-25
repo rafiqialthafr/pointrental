@@ -241,10 +241,13 @@ export default function CarDetail() {
             const snapData = await snapRes.json();
             if (!snapData.token) throw new Error('Token pembayaran tidak ditemukan');
 
+            let paymentChosen = false;
+
             // 3. Panggil Snap Pop-up
             if (window.snap) {
                 window.snap.pay(snapData.token, {
                     onSuccess: async (result) => {
+                        paymentChosen = true;
                         // Bayar langsung (kartu kredit / beberapa metode instan)
                         if (pollingRef.current) clearInterval(pollingRef.current);
                         let fPay = result.payment_type || 'MIDTRANS';
@@ -263,6 +266,7 @@ export default function CarDetail() {
                         setBookingStep(2);
                     },
                     onPending: async (result) => {
+                        paymentChosen = true;
                         // VA / QRIS / e-wallet → tampilkan pending, lalu polling hingga webhook update
                         let fPay = result.payment_type || 'MIDTRANS';
                         if (fPay === 'bank_transfer') {
@@ -290,12 +294,20 @@ export default function CarDetail() {
                         }).catch(e => console.error("Auto-simulate failed:", e));
 
                     },
-                    onError: (err) => {
+                    onError: async (err) => {
                         console.error('Snap Error:', err);
+                        if (bookingData?.booking?.id) {
+                            await fetch(`/api/bookings/${bookingData.booking.id}`, { method: 'DELETE' }).catch(e => { });
+                        }
                         alert('Eror Midtrans: ' + err.status_message);
                     },
-                    onClose: () => {
+                    onClose: async () => {
                         setIsProcessing(false);
+                        if (!paymentChosen && bookingData?.booking?.id) {
+                            // User menutup popup sebelum memilih/menyelesaikan pembayaran
+                            // Hapus data booking agar tidak masuk ke riwayat admin
+                            await fetch(`/api/bookings/${bookingData.booking.id}`, { method: 'DELETE' }).catch(e => console.error('Gagal hapus booking dibatalkan:', e));
+                        }
                     }
                 });
             } else {
