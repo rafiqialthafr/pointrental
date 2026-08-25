@@ -221,8 +221,12 @@ export default function CarDetail() {
             const snapData = await snapRes.json();
             if (!snapData.token) throw new Error('Token pembayaran tidak ditemukan');
 
+            let createdBookingId = null;
+            let isPaidSuccess = false;
+
             // Helper simpan booking ke DB HANYA ketika metode pembayaran telah dipilih/diproses
             const saveBookingToDB = async (status, paymentType) => {
+                if (createdBookingId) return createdBookingId; // Sudah terbuat sebelumnya
                 try {
                     const bookingRes = await fetch('/api/bookings', {
                         method: 'POST',
@@ -242,7 +246,8 @@ export default function CarDetail() {
                         })
                     });
                     const bData = await bookingRes.json();
-                    return bData.booking?.id || null;
+                    createdBookingId = bData.booking?.id || null;
+                    return createdBookingId;
                 } catch (err) {
                     console.error('Failed to save booking:', err);
                     return null;
@@ -253,6 +258,7 @@ export default function CarDetail() {
             if (window.snap) {
                 window.snap.pay(snapData.token, {
                     onSuccess: async (result) => {
+                        isPaidSuccess = true;
                         if (pollingRef.current) clearInterval(pollingRef.current);
                         let fPay = result.payment_type || 'MIDTRANS';
                         if (fPay === 'bank_transfer') {
@@ -261,7 +267,17 @@ export default function CarDetail() {
                         } else if (fPay === 'echannel') fPay = 'MANDIRI VA';
                         else fPay = fPay.replace('_', ' ').toUpperCase();
 
-                        const bookingId = await saveBookingToDB('PAID', fPay);
+                        let bookingId = createdBookingId;
+                        if (!bookingId) {
+                            bookingId = await saveBookingToDB('PAID', fPay);
+                        } else {
+                            await fetch(`/api/bookings/${bookingId}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ status: 'PAID', paymentType: fPay })
+                            });
+                        }
+
                         setSuccessData({ bookingId, orderId: snapData.orderId, status: 'paid' });
                         setBookingStep(2);
                     },
@@ -290,12 +306,21 @@ export default function CarDetail() {
                         }).catch(e => console.error("Auto-simulate failed:", e));
 
                     },
-                    onError: (err) => {
+                    onError: async (err) => {
                         console.error('Snap Error:', err);
+                        if (createdBookingId) {
+                            await fetch(`/api/bookings/${createdBookingId}`, { method: 'DELETE' }).catch(e => { });
+                        }
                         alert('Eror Midtrans: ' + err.status_message);
                     },
-                    onClose: () => {
+                    onClose: async () => {
                         setIsProcessing(false);
+                        if (!isPaidSuccess && createdBookingId) {
+                            // Jika pengguna menutup form Midtrans tanpa menyelesaikan pembayaran (meskipun sudah sempat klik opsi VA/QRIS)
+                            // Hapus record booking otomatis agar riwayat admin tetap bersih 100%!
+                            await fetch(`/api/bookings/${createdBookingId}`, { method: 'DELETE' }).catch(e => console.error('Hapus canceled booking gagal:', e));
+                            createdBookingId = null;
+                        }
                     }
                 });
             } else {
