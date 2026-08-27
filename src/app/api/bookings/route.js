@@ -63,9 +63,12 @@ export async function POST(req) {
     try {
         const body = await req.json();
 
+        const bookingId = body.midtransOrderId || body.id || `BOOK-${Date.now()}`;
+
         const newBooking = {
-            id: `INV-${Date.now()}`,
+            id: bookingId,
             ...body,
+            midtransOrderId: body.midtransOrderId || bookingId,
             status: body.status || 'PENDING_PAYMENT',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()

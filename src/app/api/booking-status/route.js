@@ -87,9 +87,23 @@ export async function GET(request) {
 
                 if (statusRes.ok) {
                     const statusData = await statusRes.json();
+                    
+                    // Format payment_type jika ada detail bank dari Midtrans
+                    if (statusData.payment_type) {
+                        if (statusData.payment_type === 'bank_transfer') {
+                            const bank = statusData.va_numbers?.[0]?.bank || (statusData.permata_va_number ? 'permata' : 'BANK');
+                            paymentType = `${bank.toUpperCase()} VA`;
+                        } else if (statusData.payment_type === 'echannel') {
+                            paymentType = 'MANDIRI VA';
+                        } else if (['qris', 'gopay', 'shopeepay'].includes(statusData.payment_type)) {
+                            paymentType = statusData.payment_type.toUpperCase();
+                        } else {
+                            paymentType = statusData.payment_type.replace('_', ' ').toUpperCase();
+                        }
+                    }
+
                     if (statusData.transaction_status === 'settlement' || statusData.transaction_status === 'capture') {
                         currentStatus = 'PAID';
-                        if (statusData.payment_type) paymentType = statusData.payment_type;
 
                         updateLocalStatus(orderId, 'PAID', paymentType);
 
@@ -97,7 +111,7 @@ export async function GET(request) {
                             try {
                                 await supabase
                                     .from('bookings')
-                                    .update({ status: 'PAID', updatedAt: new Date().toISOString() })
+                                    .update({ status: 'PAID', paymentType: paymentType, updatedAt: new Date().toISOString() })
                                     .eq('midtransOrderId', orderId);
                             } catch (e) { }
                         }

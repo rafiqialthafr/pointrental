@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useParams, useRouter } from 'next/navigation';
 import { cars } from "@/data/cars";
 import Navbar from "@/components/Navbar";
@@ -262,7 +262,7 @@ export default function CarDetail() {
                         if (pollingRef.current) clearInterval(pollingRef.current);
                         let fPay = result.payment_type || 'MIDTRANS';
                         if (fPay === 'bank_transfer') {
-                            const bank = result.va_numbers?.[0]?.bank || 'BANK';
+                            const bank = result.va_numbers?.[0]?.bank || (result.permata_va_number ? 'permata' : 'BANK');
                             fPay = `${bank.toUpperCase()} VA`;
                         } else if (fPay === 'echannel') fPay = 'MANDIRI VA';
                         else fPay = fPay.replace('_', ' ').toUpperCase();
@@ -284,7 +284,7 @@ export default function CarDetail() {
                     onPending: async (result) => {
                         let fPay = result.payment_type || 'MIDTRANS';
                         if (fPay === 'bank_transfer') {
-                            const bank = result.va_numbers?.[0]?.bank || 'BANK';
+                            const bank = result.va_numbers?.[0]?.bank || (result.permata_va_number ? 'permata' : 'BANK');
                             fPay = `${bank.toUpperCase()} VA`;
                         } else if (fPay === 'echannel') fPay = 'MANDIRI VA';
                         else fPay = fPay.replace('_', ' ').toUpperCase();
@@ -353,7 +353,7 @@ export default function CarDetail() {
                 <div className={`${isDark ? 'max-w-6xl mx-auto px-6 flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest' : 'max-w-6xl mx-auto px-6 flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest'}`}>
                     <Link href="/" className="hover:text-[#C5A059] transition-colors">Beranda</Link>
                     <ChevronRight className="w-3 h-3" />
-                    <Link href="/katalog" className="hover:text-[#C5A059] transition-colors">Katalog</Link>
+                    <Link href="/armada" className="hover:text-[#C5A059] transition-colors">Armada</Link>
                     <ChevronRight className="w-3 h-3" />
                     <span className="text-[#C5A059]">{car.model}</span>
                 </div>

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-    LayoutDashboard, Car, CreditCard, FileText, Settings, LogOut,
+    LayoutDashboard, Car, CreditCard, FileText, LogOut,
     ExternalLink, CheckCircle, Clock, XCircle, DollarSign,
     PieChart, Calendar as CalendarIcon, Edit, Trash2, Search, Banknote, X, RotateCw
 } from 'lucide-react';
@@ -211,11 +211,12 @@ export default function AdminDashboard() {
     const safeBookingsList = Array.isArray(bookings) ? bookings : [];
     const safeCarsList = Array.isArray(carsData) ? carsData : [];
 
-    const recentActivity = safeBookingsList.slice(0, 10);
+    const recentActivity = safeBookingsList.slice(0, 3);
 
     const filteredBookings = safeBookingsList.filter(b =>
         (b.customerName || b.userName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (b.id || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (b.midtransOrderId || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (b.carModel || b.carId || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -421,7 +422,7 @@ export default function AdminDashboard() {
 
                                         return (
                                             <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
-                                                <td className="px-6 py-4 font-bold text-slate-700 text-xs">{b.id}</td>
+                                                <td className="px-6 py-4 font-bold text-slate-700 text-xs">{b.midtransOrderId || b.id}</td>
                                                 <td className="px-6 py-4">
                                                     <p className="font-bold text-slate-800">{custName}</p>
                                                     <p className="text-xs text-slate-500 font-medium">{custPhone}</p>
@@ -433,7 +434,9 @@ export default function AdminDashboard() {
                                                 <td className="px-6 py-4 font-bold text-slate-800">Rp {(b.totalPrice || 0).toLocaleString('id-ID')}</td>
                                                 <td className="px-6 py-4">
                                                     <div className="inline-block bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-md">
-                                                        <span className="text-xs font-bold text-slate-700 uppercase">{b.paymentType || 'MIDTRANS'}</span>
+                                                        <span className="text-xs font-bold text-slate-700 uppercase">
+                                                            {b.paymentType === 'bank_transfer' ? 'BANK TRANSFER VA' : b.paymentType || 'MIDTRANS'}
+                                                        </span>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
@@ -479,27 +482,7 @@ export default function AdminDashboard() {
                         </div>
                     </div>
                 );
-            case 'Pengaturan':
-                return (
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 max-w-2xl">
-                        <h3 className="text-xl font-bold text-slate-800 mb-6 border-b border-slate-100 pb-4 font-sans">Pengaturan Sistem</h3>
-                        <div className="space-y-5">
-                            <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-2">Nama Perusahaan / Portal</label>
-                                <input type="text" className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium bg-slate-50 text-slate-800 outline-none focus:border-[#C5A059] focus:bg-white transition-colors" defaultValue="PointRental Corporate" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-2">Email Layanan</label>
-                                <input type="email" className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium bg-slate-50 text-slate-800 outline-none focus:border-[#C5A059] focus:bg-white transition-colors" defaultValue="admin@pointrental.id" />
-                            </div>
-                            <div className="pt-6 flex gap-4">
-                                <button onClick={() => alert('Data pengaturan tersimpan!')} className="px-6 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 shadow-md">Simpan Perubahan</button>
-                                <button onClick={handleLogout} className="px-6 py-3 bg-red-50 text-red-600 border border-red-200 font-bold rounded-xl hover:bg-red-100 transition-colors">Logout Dashboard</button>
-                            </div>
-                        </div>
-                    </div>
-                );
-            default:
+             default:
                 return null;
         }
     };
@@ -546,10 +529,6 @@ export default function AdminDashboard() {
                     <div>
                         <p className="px-4 text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-3">Sistem</p>
                         <div className="space-y-1">
-                            <button onClick={() => { setActiveTab('Pengaturan'); setIsMenuOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === 'Pengaturan' ? 'bg-[#C5A059]/10 text-amber-400 border border-[#C5A059]/20 shadow-inner' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}>
-                                <Settings className="w-5 h-5" />
-                                <span className="text-sm">Pengaturan</span>
-                            </button>
                             <Link target="_blank" href="/" className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800/50 hover:text-white rounded-xl transition-all font-semibold">
                                 <ExternalLink className="w-5 h-5" />
                                 <span className="text-sm">Lihat Website</span>
