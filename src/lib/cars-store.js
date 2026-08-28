@@ -7,23 +7,39 @@ const dbPath = path.join(process.cwd(), 'src/data/cars.json');
 // In-memory cache
 let memoryCars = null;
 
+function sortCars(cars) {
+    if (!Array.isArray(cars)) return [];
+    return [...cars].sort((a, b) => {
+        // Natural numerical order by ID: car_1, car_2, car_3, ...
+        const matchA = String(a.id || '').match(/\d+/);
+        const matchB = String(b.id || '').match(/\d+/);
+        const numA = matchA ? parseInt(matchA[0], 10) : NaN;
+        const numB = matchB ? parseInt(matchB[0], 10) : NaN;
+
+        if (!isNaN(numA) && !isNaN(numB) && numA !== numB) {
+            return numA - numB;
+        }
+        return String(a.id || '').localeCompare(String(b.id || ''));
+    });
+}
+
 function readLocalCars() {
     try {
         if (fs.existsSync(dbPath)) {
             const raw = fs.readFileSync(dbPath, 'utf8');
             memoryCars = JSON.parse(raw);
-            return memoryCars;
+            return sortCars(memoryCars);
         }
     } catch (e) {
         console.error('Error reading cars.json:', e.message);
     }
-    return memoryCars || [];
+    return memoryCars ? sortCars(memoryCars) : [];
 }
 
 function writeLocalCars(cars) {
-    memoryCars = [...cars];
+    memoryCars = sortCars(cars);
     try {
-        fs.writeFileSync(dbPath, JSON.stringify(cars, null, 4), 'utf8');
+        fs.writeFileSync(dbPath, JSON.stringify(memoryCars, null, 4), 'utf8');
     } catch (e) {
         // Ignored on read-only serverless environments
     }
@@ -35,11 +51,10 @@ export async function getCars() {
         try {
             const { data, error } = await supabase
                 .from('cars')
-                .select('*')
-                .order('createdAt', { ascending: true });
+                .select('*');
             
             if (!error && data && data.length > 0) {
-                return data;
+                return sortCars(data);
             }
         } catch (err) {
             console.warn('[Supabase getCars Warning]', err.message);
@@ -135,5 +150,5 @@ export async function deleteCar(id) {
 // Backward compatibility helper
 export function saveCars(cars) {
     writeLocalCars(cars);
-    return cars;
+    return memoryCars;
 }
