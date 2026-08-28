@@ -54,7 +54,7 @@
         "type": "Sedan",
         "transmission": "Otomatis",
         "fuel": "Bensin",
-        "pricePerDay": 950000,
+        "pricePerDay": 1000000,
         "status": "Tersedia",
         "rating": 4.7,
         "seats": 5,
