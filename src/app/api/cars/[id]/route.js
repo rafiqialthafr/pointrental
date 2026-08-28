@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { getCars, saveCars } from '@/lib/cars-store';
+import { getCars, updateCar, deleteCar } from '@/lib/cars-store';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -10,55 +10,58 @@ export async function PATCH(req, context) {
     try {
         const { id } = await context.params;
         const formData = await req.formData();
-        const cars = getCars();
-        const index = cars.findIndex(c => String(c.id) === String(id));
+        const cars = await getCars();
+        const existingCar = cars.find(c => String(c.id) === String(id));
 
-        if (index === -1) {
+        if (!existingCar) {
             return NextResponse.json({ error: 'Car not found' }, { status: 404 });
         }
 
-        let imageUrl = formData.get('image') || cars[index].image;
+        let imageUrl = formData.get('image') || existingCar.image;
         const imageFile = formData.get('imageFile');
-        const uploadDir = path.join(process.cwd(), 'public/uploads');
 
         if (imageFile && typeof imageFile !== 'string' && imageFile.size > 0 && imageFile.name) {
-            if (!fs.existsSync(uploadDir)) {
-                fs.mkdirSync(uploadDir, { recursive: true });
-            }
             const bytes = await imageFile.arrayBuffer();
             const buffer = Buffer.from(bytes);
-            const fileName = `${Date.now()}_${imageFile.name.replace(/\s+/g, '_')}`;
-            const filePath = path.join(uploadDir, fileName);
+            const mimeType = imageFile.type || 'image/jpeg';
+            
+            // Persistent Data URL for cloud & serverless
+            imageUrl = `data:${mimeType};base64,${buffer.toString('base64')}`;
+
             try {
+                const uploadDir = path.join(process.cwd(), 'public/uploads');
+                if (!fs.existsSync(uploadDir)) {
+                    fs.mkdirSync(uploadDir, { recursive: true });
+                }
+                const fileName = `${Date.now()}_${imageFile.name.replace(/\s+/g, '_')}`;
+                const filePath = path.join(uploadDir, fileName);
                 fs.writeFileSync(filePath, buffer);
-                imageUrl = `/uploads/${fileName}`;
             } catch (e) {
-                console.warn('[Upload] Could not write image:', e.message);
+                // Ignore filesystem write errors on Vercel
             }
         }
 
         const priceVal = formData.get('pricePerDay');
         const seatsVal = formData.get('seats');
 
-        cars[index] = {
-            ...cars[index],
-            brand: formData.get('brand') || cars[index].brand,
-            model: formData.get('model') || cars[index].model,
-            type: formData.get('type') || cars[index].type,
-            transmission: formData.get('transmission') || cars[index].transmission,
-            fuel: formData.get('fuel') || cars[index].fuel,
-            pricePerDay: priceVal !== null && priceVal !== undefined && !isNaN(Number(priceVal)) ? Number(priceVal) : cars[index].pricePerDay,
-            seats: seatsVal !== null && seatsVal !== undefined && !isNaN(Number(seatsVal)) ? Number(seatsVal) : cars[index].seats,
-            status: formData.get('status') || cars[index].status,
-            description: formData.has('description') ? (formData.get('description') || '') : cars[index].description,
-            terms: formData.has('terms') ? (formData.get('terms') || '') : cars[index].terms,
+        const updatedFields = {
+            brand: formData.get('brand') || existingCar.brand,
+            model: formData.get('model') || existingCar.model,
+            type: formData.get('type') || existingCar.type,
+            transmission: formData.get('transmission') || existingCar.transmission,
+            fuel: formData.get('fuel') || existingCar.fuel,
+            pricePerDay: priceVal !== null && priceVal !== undefined && !isNaN(Number(priceVal)) ? Number(priceVal) : existingCar.pricePerDay,
+            seats: seatsVal !== null && seatsVal !== undefined && !isNaN(Number(seatsVal)) ? Number(seatsVal) : existingCar.seats,
+            status: formData.get('status') || existingCar.status,
+            description: formData.has('description') ? (formData.get('description') || '') : existingCar.description,
+            terms: formData.has('terms') ? (formData.get('terms') || '') : existingCar.terms,
             image: imageUrl,
-            gallery: imageUrl !== cars[index].image ? [imageUrl] : (cars[index].gallery || [imageUrl])
+            gallery: imageUrl !== existingCar.image ? [imageUrl] : (existingCar.gallery || [imageUrl])
         };
 
-        saveCars(cars);
+        const updatedCar = await updateCar(id, updatedFields);
 
-        return NextResponse.json({ success: true, car: cars[index] });
+        return NextResponse.json({ success: true, car: updatedCar });
     } catch (err) {
         console.error('PATCH /api/cars/[id] error:', err);
         return NextResponse.json({ error: 'Failed to update car: ' + err.message }, { status: 500 });
@@ -68,10 +71,7 @@ export async function PATCH(req, context) {
 export async function DELETE(req, context) {
     try {
         const { id } = await context.params;
-        let cars = getCars();
-        cars = cars.filter(c => String(c.id) !== String(id));
-        saveCars(cars);
-
+        await deleteCar(id);
         return NextResponse.json({ success: true });
     } catch (err) {
         console.error('DELETE /api/cars/[id] error:', err);

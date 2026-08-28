@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { getCars, saveCars } from '@/lib/cars-store';
+import { getCars, addCar } from '@/lib/cars-store';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -13,29 +13,40 @@ const NO_CACHE_HEADERS = {
 };
 
 export async function GET() {
-    return NextResponse.json(getCars(), { headers: NO_CACHE_HEADERS });
+    try {
+        const cars = await getCars();
+        return NextResponse.json(cars, { headers: NO_CACHE_HEADERS });
+    } catch (err) {
+        console.error('GET /api/cars error:', err);
+        return NextResponse.json([], { headers: NO_CACHE_HEADERS });
+    }
 }
 
 export async function POST(req) {
     try {
         const formData = await req.formData();
-        const uploadDir = path.join(process.cwd(), 'public/uploads');
         let imageUrl = formData.get('image');
-
         const imageFile = formData.get('imageFile');
+
         if (imageFile && typeof imageFile !== 'string' && imageFile.size > 0 && imageFile.name) {
-            if (!fs.existsSync(uploadDir)) {
-                fs.mkdirSync(uploadDir, { recursive: true });
-            }
             const bytes = await imageFile.arrayBuffer();
             const buffer = Buffer.from(bytes);
-            const fileName = `${Date.now()}_${imageFile.name.replace(/\s+/g, '_')}`;
-            const filePath = path.join(uploadDir, fileName);
+            const mimeType = imageFile.type || 'image/jpeg';
+            
+            // Generate Data URL for 100% persistent storage across Vercel and local
+            imageUrl = `data:${mimeType};base64,${buffer.toString('base64')}`;
+
+            // Optional: try saving locally if filesystem allows
             try {
+                const uploadDir = path.join(process.cwd(), 'public/uploads');
+                if (!fs.existsSync(uploadDir)) {
+                    fs.mkdirSync(uploadDir, { recursive: true });
+                }
+                const fileName = `${Date.now()}_${imageFile.name.replace(/\s+/g, '_')}`;
+                const filePath = path.join(uploadDir, fileName);
                 fs.writeFileSync(filePath, buffer);
-                imageUrl = `/uploads/${fileName}`;
             } catch (e) {
-                console.warn('[Upload] Could not write image:', e.message);
+                // Ignore filesystem write errors on Vercel
             }
         } else if (!imageUrl) {
             imageUrl = "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1200&auto=format&fit=crop";
@@ -59,14 +70,14 @@ export async function POST(req) {
             terms: formData.get('terms') || '',
             image: imageUrl,
             gallery: [imageUrl],
-            features: ['Unit Terawat', 'Full AC', 'Audio Premium', 'Driver Pilihan']
+            features: ['Unit Terawat', 'Full AC', 'Audio Premium', 'Driver Pilihan'],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
         };
 
-        const cars = getCars();
-        cars.push(newCar);
-        saveCars(cars);
+        const createdCar = await addCar(newCar);
 
-        return NextResponse.json({ success: true, car: newCar });
+        return NextResponse.json({ success: true, car: createdCar });
     } catch (err) {
         console.error('POST /api/cars error:', err);
         return NextResponse.json({ error: 'Failed to add car: ' + err.message }, { status: 500 });
