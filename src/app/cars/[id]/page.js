@@ -91,8 +91,18 @@ export default function CarDetail() {
 
     useEffect(() => {
         if (!params || !params.id) return;
-        const foundCar = cars.find(c => c.id === params.id);
+        const foundCar = cars.find(c => String(c.id) === String(params.id));
         if (foundCar) setCar(foundCar);
+
+        fetch(`/api/cars?t=${Date.now()}`, { cache: 'no-store' })
+            .then(res => res.json())
+            .then(allCars => {
+                if (Array.isArray(allCars)) {
+                    const liveCar = allCars.find(c => String(c.id) === String(params.id));
+                    if (liveCar) setCar(liveCar);
+                }
+            })
+            .catch(e => console.error('Failed to fetch live car details:', e));
     }, [params]);
 
     // Fetch ratings for this car

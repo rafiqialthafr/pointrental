@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useEffect } from 'react';
 import { cars } from "@/data/cars";
 import Navbar from "@/components/Navbar";
@@ -8,6 +8,7 @@ import { Filter, Search, SlidersHorizontal, Car, ChevronDown } from 'lucide-reac
 import { useTheme } from '@/components/ThemeContext';
 
 export default function Catalog() {
+    const [carsData, setCarsData] = useState(cars);
     const [searchTerm, setSearchTerm] = useState('');
     const [typeFilter, setTypeFilter] = useState('Semua');
     const [brandFilter, setBrandFilter] = useState('Semua');
@@ -15,12 +16,29 @@ export default function Catalog() {
     const { isLight } = useTheme();
     const isDark = !isLight;
 
-    const uniqueBrands = ['Semua', ...new Set(cars.map(c => c.brand))];
-    const uniqueTypes = ['Semua', ...new Set(cars.map(c => c.type))];
-    const filteredCars = cars.filter(car => {
+    useEffect(() => {
+        const fetchLiveCars = async () => {
+            try {
+                const res = await fetch(`/api/cars?t=${Date.now()}`, { cache: 'no-store' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        setCarsData(data);
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to fetch live cars:', e);
+            }
+        };
+        fetchLiveCars();
+    }, []);
+
+    const uniqueBrands = ['Semua', ...new Set(carsData.map(c => c.brand))];
+    const uniqueTypes = ['Semua', ...new Set(carsData.map(c => c.type))];
+    const filteredCars = carsData.filter(car => {
         const cleanSearch = searchTerm.toLowerCase().replace(/[-\s]/g, '');
-        const cleanBrand = car.brand.toLowerCase().replace(/[-\s]/g, '');
-        const cleanModel = car.model.toLowerCase().replace(/[-\s]/g, '');
+        const cleanBrand = (car.brand || '').toLowerCase().replace(/[-\s]/g, '');
+        const cleanModel = (car.model || '').toLowerCase().replace(/[-\s]/g, '');
 
         let aliases = "";
         if (cleanBrand.includes("mercedes")) aliases = "marcedes benz marcedesbenz";
@@ -28,8 +46,8 @@ export default function Catalog() {
         const searchableText = `${cleanBrand}${cleanModel}${aliases}`;
 
         const s = searchableText.includes(cleanSearch) ||
-            car.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            car.brand.toLowerCase().includes(searchTerm.toLowerCase());
+            (car.model || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (car.brand || '').toLowerCase().includes(searchTerm.toLowerCase());
 
         const t = typeFilter === 'Semua' || car.type === typeFilter;
         const b = brandFilter === 'Semua' || car.brand === brandFilter;

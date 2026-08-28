@@ -109,10 +109,24 @@ export default function AdminDashboard() {
         router.push('/login');
     };
 
+    const [isSavingCar, setIsSavingCar] = useState(false);
+
     const openCarModal = (car = null) => {
         if (car) {
             setEditingCar(car);
-            setCarForm({ ...car });
+            setCarForm({
+                brand: car.brand || '',
+                model: car.model || '',
+                type: car.type || 'SUV',
+                transmission: car.transmission || 'Otomatis',
+                fuel: car.fuel || 'Bensin',
+                pricePerDay: car.pricePerDay || 0,
+                status: car.status || 'Tersedia',
+                seats: car.seats || 4,
+                image: car.image || '',
+                description: car.description || '',
+                terms: car.terms || ''
+            });
         } else {
             setEditingCar(null);
             setCarForm({
@@ -126,42 +140,59 @@ export default function AdminDashboard() {
 
     const handleSaveCar = async (e) => {
         e.preventDefault();
+        setIsSavingCar(true);
         try {
             const formData = new FormData();
             Object.entries(carForm).forEach(([key, value]) => {
-                formData.append(key, value);
+                if (value !== undefined && value !== null) {
+                    formData.append(key, value);
+                }
             });
             if (imageFile) {
                 formData.append('imageFile', imageFile);
             }
 
+            let res;
             if (editingCar) {
-                await fetch(`/api/cars/${editingCar.id}`, {
+                res = await fetch(`/api/cars/${editingCar.id}`, {
                     method: 'PATCH',
                     body: formData
                 });
             } else {
-                await fetch('/api/cars', {
+                res = await fetch('/api/cars', {
                     method: 'POST',
                     body: formData
                 });
             }
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || 'Gagal menyimpan armada');
+            }
+
             setShowCarModal(false);
             setEditingCar(null);
             setImageFile(null);
-            fetchCars();
+            await fetchCars();
         } catch (err) {
-            alert('Gagal menyimpan armada');
+            console.error('Error saving car:', err);
+            alert('Gagal menyimpan armada: ' + err.message);
+        } finally {
+            setIsSavingCar(false);
         }
     };
 
     const handleDeleteCar = async (id) => {
         if (!confirm('Yakin ingin menghapus armada ini?')) return;
         try {
-            await fetch(`/api/cars/${id}`, { method: 'DELETE' });
-            fetchCars();
+            const res = await fetch(`/api/cars/${id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || 'Gagal menghapus');
+            }
+            await fetchCars();
         } catch (err) {
-            alert('Gagal menghapus armada');
+            alert('Gagal menghapus armada: ' + err.message);
         }
     };
 
@@ -656,9 +687,16 @@ export default function AdminDashboard() {
                             </form>
                         </div>
                         <div className="p-6 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl flex justify-end gap-3">
-                            <button onClick={() => setShowCarModal(false)} className="px-5 py-2.5 text-slate-600 text-sm font-bold hover:bg-slate-200 rounded-xl transition-colors">Batalkan</button>
-                            <button form="carForm" type="submit" className="px-6 py-2.5 bg-slate-900 shadow-md text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-colors">
-                                {editingCar ? 'Simpan Perubahan' : 'Tambahkan Armada'}
+                            <button disabled={isSavingCar} onClick={() => setShowCarModal(false)} className="px-5 py-2.5 text-slate-600 text-sm font-bold hover:bg-slate-200 rounded-xl transition-colors disabled:opacity-50">Batalkan</button>
+                            <button disabled={isSavingCar} form="carForm" type="submit" className="px-6 py-2.5 bg-slate-900 shadow-md text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50 flex items-center gap-2">
+                                {isSavingCar ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        <span>Menyimpan...</span>
+                                    </>
+                                ) : (
+                                    editingCar ? 'Simpan Perubahan' : 'Tambahkan Armada'
+                                )}
                             </button>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useParams } from 'next/navigation';
 import { cars } from "@/data/cars";
 import Navbar from "@/components/Navbar";
@@ -18,8 +18,18 @@ export default function RatingsPage() {
 
     useEffect(() => {
         if (!params?.id) return;
-        const foundCar = cars.find(c => c.id === params.id);
+        const foundCar = cars.find(c => String(c.id) === String(params.id));
         if (foundCar) setCar(foundCar);
+
+        fetch(`/api/cars?t=${Date.now()}`, { cache: 'no-store' })
+            .then(res => res.json())
+            .then(allCars => {
+                if (Array.isArray(allCars)) {
+                    const liveCar = allCars.find(c => String(c.id) === String(params.id));
+                    if (liveCar) setCar(liveCar);
+                }
+            })
+            .catch(e => console.error(e));
     }, [params]);
 
     const fetchRatings = async (carId) => {

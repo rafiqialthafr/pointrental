@@ -1,28 +1,17 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { getCars, saveCars } from '@/lib/cars-store';
 
-const dbPath = path.join(process.cwd(), 'src/data/cars.json');
-
-function getCars() {
-    if (!fs.existsSync(dbPath)) return [];
-    return JSON.parse(fs.readFileSync(dbPath, 'utf8'));
-}
-
-function saveCars(cars) {
-    try {
-        fs.writeFileSync(dbPath, JSON.stringify(cars, null, 4), 'utf8');
-    } catch (e) {
-        console.warn('[Vercel FS Bypass] Could not write cars:', e.message);
-    }
-}
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function PATCH(req, context) {
     try {
         const { id } = await context.params;
         const formData = await req.formData();
         const cars = getCars();
-        const index = cars.findIndex(c => c.id === id);
+        const index = cars.findIndex(c => String(c.id) === String(id));
 
         if (index === -1) {
             return NextResponse.json({ error: 'Car not found' }, { status: 404 });
@@ -32,7 +21,7 @@ export async function PATCH(req, context) {
         const imageFile = formData.get('imageFile');
         const uploadDir = path.join(process.cwd(), 'public/uploads');
 
-        if (imageFile && typeof imageFile !== 'string') {
+        if (imageFile && typeof imageFile !== 'string' && imageFile.size > 0 && imageFile.name) {
             if (!fs.existsSync(uploadDir)) {
                 fs.mkdirSync(uploadDir, { recursive: true });
             }
@@ -42,11 +31,14 @@ export async function PATCH(req, context) {
             const filePath = path.join(uploadDir, fileName);
             try {
                 fs.writeFileSync(filePath, buffer);
+                imageUrl = `/uploads/${fileName}`;
             } catch (e) {
-                console.warn('[Vercel FS Bypass] Could not write image:', e.message);
+                console.warn('[Upload] Could not write image:', e.message);
             }
-            imageUrl = `/uploads/${fileName}`;
         }
+
+        const priceVal = formData.get('pricePerDay');
+        const seatsVal = formData.get('seats');
 
         cars[index] = {
             ...cars[index],
@@ -55,11 +47,11 @@ export async function PATCH(req, context) {
             type: formData.get('type') || cars[index].type,
             transmission: formData.get('transmission') || cars[index].transmission,
             fuel: formData.get('fuel') || cars[index].fuel,
-            pricePerDay: parseInt(formData.get('pricePerDay')) || cars[index].pricePerDay,
-            seats: parseInt(formData.get('seats')) || cars[index].seats,
+            pricePerDay: priceVal !== null && priceVal !== undefined && !isNaN(Number(priceVal)) ? Number(priceVal) : cars[index].pricePerDay,
+            seats: seatsVal !== null && seatsVal !== undefined && !isNaN(Number(seatsVal)) ? Number(seatsVal) : cars[index].seats,
             status: formData.get('status') || cars[index].status,
-            description: formData.get('description') || cars[index].description,
-            terms: formData.get('terms') || cars[index].terms,
+            description: formData.has('description') ? (formData.get('description') || '') : cars[index].description,
+            terms: formData.has('terms') ? (formData.get('terms') || '') : cars[index].terms,
             image: imageUrl,
             gallery: imageUrl !== cars[index].image ? [imageUrl] : (cars[index].gallery || [imageUrl])
         };
@@ -68,8 +60,8 @@ export async function PATCH(req, context) {
 
         return NextResponse.json({ success: true, car: cars[index] });
     } catch (err) {
-        console.error(err);
-        return NextResponse.json({ error: 'Failed to update car' }, { status: 500 });
+        console.error('PATCH /api/cars/[id] error:', err);
+        return NextResponse.json({ error: 'Failed to update car: ' + err.message }, { status: 500 });
     }
 }
 
@@ -77,11 +69,12 @@ export async function DELETE(req, context) {
     try {
         const { id } = await context.params;
         let cars = getCars();
-        cars = cars.filter(c => c.id !== id);
+        cars = cars.filter(c => String(c.id) !== String(id));
         saveCars(cars);
 
         return NextResponse.json({ success: true });
     } catch (err) {
+        console.error('DELETE /api/cars/[id] error:', err);
         return NextResponse.json({ error: 'Failed to delete car' }, { status: 500 });
     }
 }

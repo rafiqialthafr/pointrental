@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useEffect } from 'react';
 import { cars, testimonials } from "@/data/cars";
 import Navbar from "@/components/Navbar";
@@ -10,9 +10,22 @@ import Link from 'next/link';
 import { useTheme } from '@/components/ThemeContext';
 
 export default function Home() {
-  const featuredCars = cars.filter(car => car.rating >= 4.9).slice(0, 3);
+  const [carsList, setCarsList] = useState(cars);
   const { isLight } = useTheme();
   const isDark = !isLight;
+
+  useEffect(() => {
+    fetch(`/api/cars?t=${Date.now()}`, { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCarsList(data);
+        }
+      })
+      .catch(e => console.error('Failed to load cars for homepage:', e));
+  }, []);
+
+  const featuredCars = carsList.filter(car => (car.rating || 5) >= 4.7).slice(0, 3);
 
   return (
     <main className="min-h-screen overflow-x-hidden" style={{ background: 'var(--theme-bg)', color: 'var(--theme-text)' }}>
