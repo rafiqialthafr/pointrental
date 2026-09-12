@@ -1,6 +1,7 @@
-﻿'use client';
+'use client';
 import Link from 'next/link';
 import { Users, Fuel, Settings2, Star } from 'lucide-react';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
 export default function CarCard({ car }) {
@@ -15,7 +16,7 @@ export default function CarCard({ car }) {
                     setRatingData({ rating: data.average, total: data.total });
                 }
             } catch (err) {
-                console.error("Failed to fetch car rating", err);
+                // silently fail for rating fetch
             }
         };
         getRating();
@@ -40,9 +41,12 @@ export default function CarCard({ car }) {
             style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
             {/* Image */}
             <div className="relative h-52 overflow-hidden" style={{ background: 'var(--theme-bg)' }}>
-                <img
+                <Image
                     src={car.image}
                     alt={`${car.brand} ${car.model}`}
+                    width={400}
+                    height={208}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
 

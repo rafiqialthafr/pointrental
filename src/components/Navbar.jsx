@@ -1,7 +1,8 @@
-﻿'use client';
+'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import { Menu, X, Car, Sun, Moon } from 'lucide-react';
 import { useTheme } from '@/components/ThemeContext';
 
@@ -50,9 +51,11 @@ export default function Navbar({ forceLightText = false }) {
                             ? (isScrolled ? 'bg-gradient-to-br from-[#0B0F19] to-[#131831]' : 'bg-[#0B0F19]/40 border border-white/10')
                             : (isScrolled ? 'bg-white border border-slate-200' : 'bg-white/60 border border-black/5')
                             }`}>
-                            <img
+                            <Image
                                 src="/favicon.ico"
-                                alt="Logo"
+                                alt="PointRental Logo"
+                                width={32}
+                                height={32}
                                 className="w-8 h-8 object-contain"
                             />
                         </div>

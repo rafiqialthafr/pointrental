@@ -3,9 +3,13 @@ import { useParams, useRouter } from 'next/navigation';
 import { cars } from "@/data/cars";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import DateRangePicker from "@/components/DateRangePicker";
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
+const DateRangePicker = dynamic(() => import('@/components/DateRangePicker'), {
+    ssr: false,
+    loading: () => <div className="h-14 w-full rounded-2xl bg-neutral-800/10 animate-pulse border border-neutral-700/20" />
+});
 import "@/components/DateRangePicker.css";
-import Script from 'next/script';
 import {
     Users,
     Fuel,
@@ -34,10 +38,16 @@ export default function CarDetail() {
     const isDark = !isLight;
     const params = useParams();
     const router = useRouter();
-    const [car, setCar] = useState(null);
+    
+    // Inisialisasi mobil langsung secara sinkron dari data lokal agar tidak ada FCP delay / layout shift
+    const initialCar = React.useMemo(() => {
+        if (!params || !params.id) return cars[0] || null;
+        return cars.find(c => String(c.id) === String(params.id)) || cars[0] || null;
+    }, [params]);
+
+    const [car, setCar] = useState(initialCar);
     const [bookingStep, setBookingStep] = useState(1); // 1: Form, 2: Success
     const [isProcessing, setIsProcessing] = useState(false);
-    const [snapReady, setSnapReady] = useState(false);
     const [successData, setSuccessData] = useState(null);
     const pollingRef = React.useRef(null);
 
@@ -61,12 +71,12 @@ export default function CarDetail() {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ status: 'PAID', midtransOrderId: orderId, paymentType: data.paymentType || 'MIDTRANS' })
-                    }).catch(e => console.error('Failed to sync booking paid status:', e));
+                    }).catch(() => {});
 
                     setSuccessData({ bookingId, orderId, status: 'paid' });
                 }
             } catch (e) {
-                console.error('[Polling] Gagal cek status:', e);
+                // polling check failed silently
             }
         }, 3000);
     };
@@ -102,7 +112,7 @@ export default function CarDetail() {
                     if (liveCar) setCar(liveCar);
                 }
             })
-            .catch(e => console.error('Failed to fetch live car details:', e));
+            .catch(() => {});
     }, [params]);
 
     // Fetch ratings for this car
@@ -114,7 +124,7 @@ export default function CarDetail() {
             if (data && Array.isArray(data.ratings)) {
                 setRatingsData(data);
             }
-        } catch (e) { console.error('Failed to fetch ratings', e); }
+        } catch (e) { /* rating fetch failed */ }
     };
 
     useEffect(() => {
@@ -137,7 +147,7 @@ export default function CarDetail() {
                 fetchRatings(car.id);
                 setTimeout(() => setRatingSuccess(false), 3000);
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { /* rating submit failed */ }
         finally { setSubmittingRating(false); }
     };
 
@@ -233,6 +243,7 @@ export default function CarDetail() {
 
             let createdBookingId = null;
             let isPaidSuccess = false;
+            let isPendingOrPaid = false;
 
             // Helper simpan booking ke DB HANYA ketika metode pembayaran telah dipilih/diproses
             const saveBookingToDB = async (status, paymentType) => {
@@ -259,16 +270,35 @@ export default function CarDetail() {
                     createdBookingId = bData.booking?.id || null;
                     return createdBookingId;
                 } catch (err) {
-                    console.error('Failed to save booking:', err);
+                    // booking save failed silently
                     return null;
                 }
             };
 
+            // On-demand Midtrans Snap loader helper
+            const loadSnapSDK = () => {
+                return new Promise((resolve, reject) => {
+                    if (typeof window !== 'undefined' && window.snap) {
+                        return resolve(window.snap);
+                    }
+                    const clientKey = (process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || '').trim();
+                    const script = document.createElement('script');
+                    script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
+                    if (clientKey) script.setAttribute('data-client-key', clientKey);
+                    script.onload = () => resolve(window.snap);
+                    script.onerror = () => reject(new Error('Gagal memuat gateway pembayaran Midtrans. Periksa koneksi internet Anda.'));
+                    document.body.appendChild(script);
+                });
+            };
+
+            const snapInstance = await loadSnapSDK();
+
             // 2. Panggil Snap Pop-up
-            if (window.snap) {
-                window.snap.pay(snapData.token, {
+            if (snapInstance) {
+                snapInstance.pay(snapData.token, {
                     onSuccess: async (result) => {
                         isPaidSuccess = true;
+                        isPendingOrPaid = true;
                         if (pollingRef.current) clearInterval(pollingRef.current);
                         let fPay = result.payment_type || 'MIDTRANS';
                         if (fPay === 'bank_transfer') {
@@ -292,6 +322,7 @@ export default function CarDetail() {
                         setBookingStep(2);
                     },
                     onPending: async (result) => {
+                        isPendingOrPaid = true;
                         let fPay = result.payment_type || 'MIDTRANS';
                         if (fPay === 'bank_transfer') {
                             const bank = result.va_numbers?.[0]?.bank || (result.permata_va_number ? 'permata' : 'BANK');
@@ -313,49 +344,36 @@ export default function CarDetail() {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ orderId: snapData.orderId })
-                        }).catch(e => console.error("Auto-simulate failed:", e));
+                        }).catch(() => {});
 
                     },
                     onError: async (err) => {
-                        console.error('Snap Error:', err);
                         if (createdBookingId) {
-                            await fetch(`/api/bookings/${createdBookingId}`, { method: 'DELETE' }).catch(e => { });
+                            await fetch(`/api/bookings/${createdBookingId}`, { method: 'DELETE' }).catch(() => { });
                         }
-                        alert('Eror Midtrans: ' + err.status_message);
+                        alert('Eror Midtrans: ' + (err.status_message || 'Terjadi kesalahan saat memproses pembayaran'));
                     },
                     onClose: async () => {
                         setIsProcessing(false);
-                        if (!isPaidSuccess && createdBookingId) {
-                            // Jika pengguna menutup form Midtrans tanpa menyelesaikan pembayaran (meskipun sudah sempat klik opsi VA/QRIS)
-                            // Hapus record booking otomatis agar riwayat admin tetap bersih 100%!
-                            await fetch(`/api/bookings/${createdBookingId}`, { method: 'DELETE' }).catch(e => console.error('Hapus canceled booking gagal:', e));
+                        if (!isPendingOrPaid && createdBookingId) {
+                            // Jika pengguna menutup form Midtrans tanpa menyelesaikan pembayaran atau memilih cara bayar
+                            await fetch(`/api/bookings/${createdBookingId}`, { method: 'DELETE' }).catch(() => {});
                             createdBookingId = null;
                         }
                     }
                 });
             } else {
-                throw new Error('SDK Midtrans belum termuat sempurna. Silakan refresh halaman.');
+                throw new Error('Sistem pembayaran Midtrans belum dapat dimuat. Silakan coba kembali.');
             }
         } catch (err) {
-            console.error('Frontend Error:', err);
-            alert('Kesalahan: ' + err.message);
+            alert('Kesalahan: ' + (err.message || 'Gagal memproses transaksi'));
         } finally {
             setIsProcessing(false);
         }
     };
 
-    // PENTING: Akun Midtrans ini Sandbox tanpa prefix SB-, paksa pakai URL Sandbox.
-    const clientKey = (process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || '').trim();
-    const snapScriptUrl = "https://app.sandbox.midtrans.com/snap/snap.js";
-
     return (
         <main className={`${isDark ? 'min-h-screen bg-[#0a0a0a] flex flex-col font-sans selection:bg-[#C5A059]/30' : 'min-h-screen bg-[#F4F7FE] flex flex-col font-sans selection:bg-[#C5A059]/30'}`}>
-            <Script
-                src={snapScriptUrl}
-                data-client-key={clientKey}
-                strategy="lazyOnload"
-                onReady={() => setSnapReady(true)}
-            />
             <Navbar />
 
             {/* ─── BREADCRUMB ─── */}
@@ -376,9 +394,13 @@ export default function CarDetail() {
                         {/* ─── 1. GAMBAR MOBIL (Mobile: Paling atas) ─── */}
                         <div className="order-1 lg:col-span-7 xl:col-span-8">
                             <div className={`${isDark ? 'bg-[#0B0F19] rounded-[2.5rem] overflow-hidden border border-neutral-900 shadow-sm relative aspect-video' : 'bg-[#F4F7FE] rounded-[2.5rem] overflow-hidden border border-neutral-900 shadow-sm relative aspect-video'}`}>
-                                <img
+                                <Image
                                     src={car.image}
                                     alt={car.model}
+                                    width={800}
+                                    height={450}
+                                    sizes="(max-width: 768px) 100vw, 60vw"
+                                    priority
                                     className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                                 />
                                 <div className="absolute top-4 left-4 sm:top-8 sm:left-8 right-4 sm:right-auto flex flex-wrap gap-2 sm:gap-3">
@@ -537,6 +559,7 @@ export default function CarDetail() {
                                                                 <button
                                                                     key={s}
                                                                     type="button"
+                                                                    aria-label={`Beri rating ${s} bintang`}
                                                                     onClick={() => setRatingForm({ ...ratingForm, score: s })}
                                                                     onMouseEnter={() => setHoverStar(s)}
                                                                     onMouseLeave={() => setHoverStar(0)}
@@ -548,8 +571,9 @@ export default function CarDetail() {
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <label className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1 mb-2 block' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1 mb-2 block'}`}>Nama</label>
+                                                        <label htmlFor="rating-name" className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1 mb-2 block' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1 mb-2 block'}`}>Nama</label>
                                                         <input
+                                                            id="rating-name"
                                                             required
                                                             type="text"
                                                             placeholder="Nama Anda"
@@ -559,8 +583,9 @@ export default function CarDetail() {
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1 mb-2 block' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1 mb-2 block'}`}>Ulasan (Opsional)</label>
+                                                        <label htmlFor="rating-review" className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1 mb-2 block' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1 mb-2 block'}`}>Ulasan (Opsional)</label>
                                                         <textarea
+                                                            id="rating-review"
                                                             placeholder="Ceritakan pengalaman Anda..."
                                                             rows={3}
                                                             className={`${isDark ? 'w-full bg-[#111] text-white border border-neutral-800 rounded-2xl py-3.5 px-5 text-sm font-bold focus:border-[#C5A059] transition-all outline-none resize-none' : 'w-full bg-white text-slate-800 border border-slate-200 rounded-2xl py-3.5 px-5 text-sm font-bold focus:border-[#C5A059] transition-all outline-none resize-none'}`}
@@ -591,7 +616,7 @@ export default function CarDetail() {
                                     {bookingStep === 1 ? (
                                         <form onSubmit={handleCheckout} className="space-y-6">
                                             <div className={`flex justify-between items-center mb-8 pb-6 border-b ${isDark ? 'border-neutral-900' : 'border-slate-200'}`}>
-                                                <h3 className={`${isDark ? 'text-2xl font-black text-white tracking-tight' : 'text-2xl font-black text-slate-800 tracking-tight'}`}>Booking</h3>
+                                                <h2 className={`${isDark ? 'text-2xl font-black text-white tracking-tight' : 'text-2xl font-black text-slate-800 tracking-tight'}`}>Booking</h2>
                                                 <div className="text-right">
                                                     <p className={`${isDark ? 'text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1' : 'text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1'}`}>Per Hari</p>
                                                     <p className="text-xl font-black text-[#C5A059] leading-none">{formatPrice(car.pricePerDay)}</p>
@@ -600,9 +625,15 @@ export default function CarDetail() {
 
                                             <div className="space-y-5">
                                                 <div className="space-y-2 relative">
-                                                    <label className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1'}`}>Pilih Paket Sewa</label>
+                                                    <label id="paket-label" className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1'}`}>Pilih Paket Sewa</label>
                                                     <div className="relative">
                                                         <div
+                                                            role="combobox"
+                                                            aria-expanded={openDropdown === 'paket'}
+                                                            aria-haspopup="listbox"
+                                                            aria-labelledby="paket-label"
+                                                            tabIndex={0}
+                                                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpenDropdown(openDropdown === 'paket' ? '' : 'paket'); } }}
                                                             onClick={() => setOpenDropdown(openDropdown === 'paket' ? '' : 'paket')}
                                                             className={`${isDark ? 'w-full bg-[#0a0a0a] text-[#C5A059] border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-black tracking-wide cursor-pointer flex justify-between items-center transition-all hover:border-neutral-700' : 'w-full bg-white text-[#C5A059] border border-slate-200 rounded-2xl py-4 px-5 text-sm font-black tracking-wide cursor-pointer shadow-sm flex justify-between items-center transition-all hover:border-[#C5A059]/30'} ${openDropdown === 'paket' ? 'border-[#C5A059] ring-2 ring-[#C5A059]/10' : ''}`}
                                                         >
@@ -634,12 +665,12 @@ export default function CarDetail() {
                                                     </div>
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1'}`}>Nama Lengkap</label>
-                                                    <input required type="text" className={`${isDark ? 'w-full bg-[#0a0a0a] text-white border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-[#0B0F19] focus:border-[#C5A059] transition-all outline-none' : 'w-full bg-white text-slate-800 border border-slate-200 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-white focus:border-[#C5A059] transition-all outline-none'}`} placeholder="Masukkan nama Anda" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                                                    <label htmlFor="booking-name" className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1'}`}>Nama Lengkap</label>
+                                                    <input id="booking-name" required type="text" className={`${isDark ? 'w-full bg-[#0a0a0a] text-white border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-[#0B0F19] focus:border-[#C5A059] transition-all outline-none' : 'w-full bg-white text-slate-800 border border-slate-200 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-white focus:border-[#C5A059] transition-all outline-none'}`} placeholder="Masukkan nama Anda" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1'}`}>No. WhatsApp</label>
-                                                    <input required type="tel" className={`${isDark ? 'w-full bg-[#0a0a0a] text-white border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-[#0B0F19] focus:border-[#C5A059] transition-all outline-none' : 'w-full bg-white text-slate-800 border border-slate-200 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-white focus:border-[#C5A059] transition-all outline-none'}`} placeholder="08..." value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+                                                    <label htmlFor="booking-phone" className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1'}`}>No. WhatsApp</label>
+                                                    <input id="booking-phone" required type="tel" className={`${isDark ? 'w-full bg-[#0a0a0a] text-white border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-[#0B0F19] focus:border-[#C5A059] transition-all outline-none' : 'w-full bg-white text-slate-800 border border-slate-200 rounded-2xl py-4 px-5 text-sm font-bold focus:bg-white focus:border-[#C5A059] transition-all outline-none'}`} placeholder="08..." value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
                                                 </div>
                                                 {formData.rentalType === 'harian' ? (
                                                     <DateRangePicker
@@ -661,9 +692,15 @@ export default function CarDetail() {
                                                         />
 
                                                         <div className="space-y-2 relative">
-                                                            <label className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1'}`}>Durasi Sewa</label>
+                                                            <label id="durasi-label" className={`${isDark ? 'text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1' : 'text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1'}`}>Durasi Sewa</label>
                                                             <div className="relative">
                                                                 <div
+                                                                    role="combobox"
+                                                                    aria-expanded={openDropdown === 'durasi'}
+                                                                    aria-haspopup="listbox"
+                                                                    aria-labelledby="durasi-label"
+                                                                    tabIndex={0}
+                                                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpenDropdown(openDropdown === 'durasi' ? '' : 'durasi'); } }}
                                                                     onClick={() => setOpenDropdown(openDropdown === 'durasi' ? '' : 'durasi')}
                                                                     className={`${isDark ? 'w-full bg-[#0a0a0a] text-white border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold cursor-pointer flex justify-between items-center transition-all hover:border-neutral-700' : 'w-full bg-white text-slate-800 border border-slate-200 rounded-2xl py-4 px-5 text-sm font-bold cursor-pointer shadow-sm flex justify-between items-center transition-all hover:border-[#C5A059]/30'} ${openDropdown === 'durasi' ? 'border-[#C5A059] ring-2 ring-[#C5A059]/10' : ''}`}
                                                                 >
@@ -692,6 +729,11 @@ export default function CarDetail() {
                                                 )}
 
                                                 <div
+                                                    role="checkbox"
+                                                    aria-checked={formData.withDriver}
+                                                    aria-label="Tambah layanan driver"
+                                                    tabIndex={0}
+                                                    onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setFormData({ ...formData, withDriver: !formData.withDriver }); } }}
                                                     onClick={() => setFormData({ ...formData, withDriver: !formData.withDriver })}
                                                     className={`${isDark ? 'flex items-center gap-4 mt-4 p-4 bg-[#0a0a0a] border border-neutral-800 rounded-2xl cursor-pointer hover:border-neutral-700 transition-colors' : 'flex items-center gap-4 mt-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer hover:border-[#C5A059]/50 transition-colors'}`}
                                                 >
@@ -734,8 +776,8 @@ export default function CarDetail() {
                                             </div>
 
                                             <div className="pt-2">
-                                                <button disabled={isProcessing || !snapReady} type="submit" className={`${isDark ? 'w-full py-5 bg-[#C5A059] text-white font-black rounded-2xl hover:bg-[#B38D46] transition-all flex items-center justify-center gap-3 active:scale-[0.98] shadow-xl disabled:opacity-50' : 'w-full py-5 bg-[#C5A059] text-slate-800 font-black rounded-2xl hover:bg-[#B38D46] transition-all flex items-center justify-center gap-3 active:scale-[0.98] shadow-xl disabled:opacity-50'}`}>
-                                                    {isProcessing ? <><Loader2 className="w-5 h-5 animate-spin" /> MENGHUBUNGKAN...</> : !snapReady ? <><Loader2 className="w-5 h-5 animate-spin" /> LOADING SDK...</> : <><ShieldCheck className="w-5 h-5" /> BOOKING SEKARANG <ArrowRight className="w-5 h-5" /></>}
+                                                <button disabled={isProcessing} type="submit" className={`${isDark ? 'w-full py-5 bg-[#C5A059] text-white font-black rounded-2xl hover:bg-[#B38D46] transition-all flex items-center justify-center gap-3 active:scale-[0.98] shadow-xl disabled:opacity-50' : 'w-full py-5 bg-[#C5A059] text-slate-800 font-black rounded-2xl hover:bg-[#B38D46] transition-all flex items-center justify-center gap-3 active:scale-[0.98] shadow-xl disabled:opacity-50'}`}>
+                                                    {isProcessing ? <><Loader2 className="w-5 h-5 animate-spin" /> MENGHUBUNGKAN...</> : <><ShieldCheck className="w-5 h-5" /> BOOKING SEKARANG <ArrowRight className="w-5 h-5" /></>}
                                                 </button>
                                                 <p className="text-[10px] text-gray-500 mt-5 text-center font-bold flex items-center justify-center gap-2 tracking-widest uppercase">
                                                     <Lock className="w-3.5 h-3.5" /> SECURE CHECKOUT BY POINTRENTAL

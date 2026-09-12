@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CarCard from "@/components/CarCard";
 import { Filter, Search, SlidersHorizontal, Car, ChevronDown } from 'lucide-react';
+import Image from 'next/image';
 import { useTheme } from '@/components/ThemeContext';
 
 export default function Catalog() {
@@ -27,7 +28,7 @@ export default function Catalog() {
                     }
                 }
             } catch (e) {
-                console.error('Failed to fetch live cars:', e);
+                // silently fail for live car fetch
             }
         };
         fetchLiveCars();
@@ -62,7 +63,7 @@ export default function Catalog() {
             {/* ═══ PAGE HEADER ═══ */}
             <section className="relative pt-24 pb-16 h-[50vh] min-h-[400px] max-h-[550px] overflow-hidden flex items-center">
                 <div className="absolute inset-0">
-                    <img src="/page-header.jpg" alt="Armada Premium PointRental" className="w-full h-full object-cover object-center" />
+                    <Image src="/page-header.jpg" alt="Armada Premium PointRental" width={1200} height={550} priority sizes="100vw" className="w-full h-full object-cover object-center" />
                     <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-r from-[#0B0F19] via-[#0B0F19]/70 to-transparent' : 'bg-gradient-to-r from-black/80 via-black/40 to-transparent'}`} />
                 </div>
 
@@ -113,7 +114,7 @@ export default function Catalog() {
                                 <h3 className="text-xs font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--theme-text)' }}>
                                     <Search className="w-3.5 h-3.5 text-[#C5A059]" /> Pencarian
                                 </h3>
-                                <input type="text" placeholder="Cari merk atau model..."
+                                <input id="armada-search" type="text" placeholder="Cari merk atau model..."
                                     className="w-full border rounded-lg py-2.5 px-3.5 text-sm font-medium outline-none focus:border-[#C5A059]/50 transition-all"
                                     style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
                                     value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />

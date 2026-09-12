@@ -1,8 +1,9 @@
-﻿'use client';
+'use client';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Phone, Mail, MapPin, Clock, Send, MessageCircle, Headphones, Shield, ArrowRight, Sparkles, Globe, Star } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useTheme } from '@/components/ThemeContext';
 import { useState, useEffect, useRef } from 'react';
 
@@ -66,9 +67,13 @@ export default function Contact() {
             <section className="relative pt-24 pb-16 h-[50vh] min-h-[400px] max-h-[550px] overflow-hidden flex items-center">
                 {/* Background Image */}
                 <div className="absolute inset-0">
-                    <img
+                    <Image
                         src="/page-header.jpg"
                         alt="Armada Premium PointRental"
+                        width={1200}
+                        height={550}
+                        priority
+                        sizes="100vw"
                         className="w-full h-full object-cover object-center"
                     />
                     {/* Overlay Dinamis - Otomatis menyesuaikan Light Theme agar foto tidak ditelan kabut hitam */}
@@ -152,16 +157,16 @@ export default function Contact() {
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="space-y-1.5">
-                                                <label className="text-[10px] font-bold uppercase tracking-widest pl-1" style={{ color: 'var(--theme-text-muted)' }}>Nama Lengkap</label>
-                                                <input type="text" required value={formData.name}
+                                                <label htmlFor="contact-name" className="text-[10px] font-bold uppercase tracking-widest pl-1" style={{ color: 'var(--theme-text-muted)' }}>Nama Lengkap</label>
+                                                <input id="contact-name" type="text" required value={formData.name}
                                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                                     className="w-full border rounded-xl py-3 px-4 text-sm font-medium outline-none transition-all placeholder:text-gray-400 focus:border-[#C5A059]/50 focus:shadow-md"
                                                     style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
                                                     placeholder="Nama Anda" />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <label className="text-[10px] font-bold uppercase tracking-widest pl-1" style={{ color: 'var(--theme-text-muted)' }}>No. WhatsApp</label>
-                                                <input type="tel" required value={formData.phone}
+                                                <label htmlFor="contact-phone" className="text-[10px] font-bold uppercase tracking-widest pl-1" style={{ color: 'var(--theme-text-muted)' }}>No. WhatsApp</label>
+                                                <input id="contact-phone" type="tel" required value={formData.phone}
                                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                     className="w-full border rounded-xl py-3 px-4 text-sm font-medium outline-none transition-all placeholder:text-gray-400 focus:border-[#C5A059]/50 focus:shadow-md"
                                                     style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
@@ -169,8 +174,8 @@ export default function Contact() {
                                             </div>
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="text-[10px] font-bold uppercase tracking-widest pl-1" style={{ color: 'var(--theme-text-muted)' }}>Subjek</label>
-                                            <select required value={formData.subject}
+                                            <label htmlFor="contact-subject" className="text-[10px] font-bold uppercase tracking-widest pl-1" style={{ color: 'var(--theme-text-muted)' }}>Subjek</label>
+                                            <select id="contact-subject" required value={formData.subject}
                                                 onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                                                 className="w-full border rounded-xl py-3 px-4 text-sm font-medium outline-none transition-all focus:border-[#C5A059]/50 focus:shadow-md"
                                                 style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}>
@@ -180,8 +185,8 @@ export default function Contact() {
                                             </select>
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="text-[10px] font-bold uppercase tracking-widest pl-1" style={{ color: 'var(--theme-text-muted)' }}>Pesan Anda</label>
-                                            <textarea required rows="4" value={formData.message}
+                                            <label htmlFor="contact-message" className="text-[10px] font-bold uppercase tracking-widest pl-1" style={{ color: 'var(--theme-text-muted)' }}>Pesan Anda</label>
+                                            <textarea id="contact-message" required rows="4" value={formData.message}
                                                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                                                 className="w-full border rounded-xl py-3 px-4 text-sm font-medium outline-none transition-all resize-none placeholder:text-gray-400 focus:border-[#C5A059]/50 focus:shadow-md"
                                                 style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
@@ -235,6 +240,7 @@ export default function Contact() {
                             {/* Map */}
                             <div className={isDark ? 'relative rounded-2xl overflow-hidden shadow-xl border h-44 color-grey' : 'relative rounded-2xl overflow-hidden shadow-xl border h-44'} style={{ borderColor: 'var(--theme-border)' }}>
                                 <iframe
+                                    title="Lokasi PointRental di Google Maps"
                                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.4898844702943!2d106.7562153739939!3d-6.585863293407734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69c5457e0e3bcf%3A0x58481d58737539c0!2sSMK%20Negeri%201%20Ciomas!5e0!3m2!1sid!2sid!4v1782621767795!5m2!1sid!2sid"
                                     className={isDark ? 'w-full h-full border-0 transition-all duration-700 grayscale' : 'w-full h-full border-0 transition-all duration-700'}
                                     allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade"

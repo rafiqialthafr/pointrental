@@ -1,9 +1,10 @@
-﻿'use client';
+'use client';
 import { useState, useEffect, useRef } from 'react';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Award, ShieldCheck, Users, MapPin, Sparkles, Target, Eye, Star, ArrowRight, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useTheme } from '@/components/ThemeContext';
 
 function useCountUp(end, duration = 2000) {
@@ -34,7 +35,7 @@ export default function About() {
             {/* ═══ PAGE HEADER ═══ */}
             <section className="relative pt-24 pb-16 h-[50vh] min-h-[400px] max-h-[550px] overflow-hidden flex items-center">
                 <div className="absolute inset-0">
-                    <img src="/page-header.jpg" alt="Armada Premium PointRental" className="w-full h-full object-cover object-center" />
+                    <Image src="/page-header.jpg" alt="Armada Premium PointRental" width={1200} height={550} priority sizes="100vw" className="w-full h-full object-cover object-center" />
                     <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-r from-[#0B0F19] via-[#0B0F19]/70 to-transparent' : 'bg-gradient-to-r from-black/80 via-black/40 to-transparent'}`} />
                 </div>
 

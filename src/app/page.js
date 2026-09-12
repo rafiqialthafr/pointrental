@@ -7,6 +7,7 @@ import CarCard from "@/components/CarCard";
 import TestimonialCard from "@/components/TestimonialCard";
 import { Star, ShieldCheck, Clock, Zap, ArrowRight, ChevronRight, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useTheme } from '@/components/ThemeContext';
 
 export default function Home() {
@@ -57,10 +58,14 @@ export default function Home() {
         {/* Gambar mobil — Layer z-10, h-[55%] untuk mempertahankan rasio mobilnya dengan mask smooth */}
         <div className="absolute inset-0 z-10 pointer-events-none select-none overflow-hidden">
           <div className={`absolute bottom-0 lg:inset-y-0 right-0 w-full lg:w-[75vw] h-[55%] lg:h-full overflow-hidden transition-opacity duration-700 ${isDark ? 'opacity-70 lg:opacity-90' : 'opacity-100'}`}>
-            <img
+            <Image
               fetchPriority="high"
               src="/hero-car.jpg"
               alt="Mobil Sport Mewah"
+              width={1200}
+              height={800}
+              priority
+              sizes="75vw"
               className={`w-full h-full object-cover lg:object-[70%_center] saturate-[1.2] ${isDark ? 'contrast-100' : 'contrast-[1.15] brightness-[0.95]'} [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_10%,black_100%)] lg:[mask-image:linear-gradient(to_right,transparent_0%,black_50%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,transparent_10%,black_100%)] lg:[-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_50%)]`}
             />
           </div>
@@ -77,9 +82,12 @@ export default function Home() {
             <div className="relative">
               <div className="absolute -inset-4 bg-gradient-to-r from-[#C5A059]/20 to-transparent blur-2xl rounded-full z-0 pointer-events-none"></div>
               <div className={`relative z-10 rounded-[2.5rem] overflow-hidden shadow-2xl ${isDark ? 'border border-neutral-800/80' : 'border border-slate-200'}`}>
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?q=80&w=2069&auto=format&fit=crop"
                   alt="Mobil Hitam Mewah PointRental"
+                  width={800}
+                  height={600}
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                   className="w-full aspect-[4/3] md:aspect-[16/9] lg:aspect-[4/3] object-cover object-center hover:scale-105 transition-transform duration-1000"
                 />
               </div>

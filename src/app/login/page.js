@@ -67,12 +67,13 @@ export default function AdminLogin() {
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Username</label>
+                                <label htmlFor="admin-username" className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Username</label>
                                 <div className="relative group">
                                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-[#C5A059] transition-colors">
                                         <User className="w-5 h-5" />
                                     </div>
                                     <input
+                                        id="admin-username"
                                         type="text"
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)}
@@ -84,12 +85,13 @@ export default function AdminLogin() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Password</label>
+                                <label htmlFor="admin-password" className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Password</label>
                                 <div className="relative group">
                                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-[#C5A059] transition-colors">
                                         <Lock className="w-5 h-5" />
                                     </div>
                                     <input
+                                        id="admin-password"
                                         type="password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}

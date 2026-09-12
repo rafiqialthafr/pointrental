@@ -9,8 +9,9 @@ import { useState, useEffect } from 'react';
 
 export default function RatingsPage() {
     const params = useParams();
-    const [car, setCar] = useState(null);
-    const [ratingsData, setRatingsData] = useState({ average: 0, total: 0, ratings: [] });
+    const initialCar = cars.find(c => String(c.id) === String(params?.id)) || cars[0] || null;
+    const [car, setCar] = useState(initialCar);
+    const [ratingsData, setRatingsData] = useState({ average: initialCar?.rating || 0, total: 0, ratings: [] });
     const [ratingForm, setRatingForm] = useState({ name: '', score: 0, review: '' });
     const [hoverStar, setHoverStar] = useState(0);
     const [submittingRating, setSubmittingRating] = useState(false);
@@ -29,7 +30,7 @@ export default function RatingsPage() {
                     if (liveCar) setCar(liveCar);
                 }
             })
-            .catch(e => console.error(e));
+            .catch(() => {});
     }, [params]);
 
     const fetchRatings = async (carId) => {
@@ -40,7 +41,7 @@ export default function RatingsPage() {
             if (data && Array.isArray(data.ratings)) {
                 setRatingsData(data);
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { /* silent fail */ }
     };
 
     useEffect(() => {
@@ -63,7 +64,7 @@ export default function RatingsPage() {
                 fetchRatings(car.id);
                 setTimeout(() => setRatingSuccess(false), 3000);
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { /* silent fail */ }
         finally { setSubmittingRating(false); }
     };
 
@@ -172,9 +173,9 @@ export default function RatingsPage() {
 
                     {/* Submit Form */}
                     <div className="bg-[#0B0F19] p-8 md:p-12 rounded-[2.5rem] border border-neutral-900">
-                        <h3 className="text-lg font-black text-white mb-6 flex items-center gap-2">
+                        <h2 className="text-lg font-black text-white mb-6 flex items-center gap-2">
                             <MessageSquare className="w-5 h-5 text-[#C5A059]" /> Beri Ulasan Anda
-                        </h3>
+                        </h2>
 
                         {ratingSuccess ? (
                             <div className="text-center py-8">
@@ -190,6 +191,7 @@ export default function RatingsPage() {
                                             <button
                                                 key={s}
                                                 type="button"
+                                                aria-label={`Beri rating ${s} bintang`}
                                                 onClick={() => setRatingForm({ ...ratingForm, score: s })}
                                                 onMouseEnter={() => setHoverStar(s)}
                                                 onMouseLeave={() => setHoverStar(0)}
@@ -201,8 +203,9 @@ export default function RatingsPage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1 mb-2 block">Nama</label>
+                                    <label htmlFor="ratings-page-name" className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1 mb-2 block">Nama</label>
                                     <input
+                                        id="ratings-page-name"
                                         required
                                         type="text"
                                         placeholder="Nama Anda"
@@ -212,8 +215,9 @@ export default function RatingsPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1 mb-2 block">Ulasan (Opsional)</label>
+                                    <label htmlFor="ratings-page-review" className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1 mb-2 block">Ulasan (Opsional)</label>
                                     <textarea
+                                        id="ratings-page-review"
                                         placeholder="Ceritakan pengalaman Anda..."
                                         rows={4}
                                         className="w-full bg-[#0a0a0a] text-white border border-neutral-800 rounded-2xl py-4 px-5 text-sm font-bold focus:border-[#C5A059] transition-all outline-none resize-none"

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, X } from 'lucide-react';
 
@@ -207,9 +207,11 @@ export default function DateRangePicker({ startDate, endDate, onDateChange, minD
         <div className={`drp-wrapper${isDark ? '' : ' drp-light'}`}>
             {/* Trigger Button */}
             <div className="drp-field-wrapper">
-                <label className="drp-label">{singleDate ? 'Pilih Tanggal Mulai Sewa' : 'Rentang Tanggal Penyewaan'}</label>
+                <label id="drp-field-label" htmlFor="drp-trigger-btn" className="drp-label">{singleDate ? 'Pilih Tanggal Mulai Sewa' : 'Rentang Tanggal Penyewaan'}</label>
                 <button
+                    id="drp-trigger-btn"
                     type="button"
+                    aria-labelledby="drp-field-label"
                     onClick={() => setIsOpen(true)}
                     className={`drp-trigger ${startDate && endDate ? 'drp-trigger-active' : ''}`}
                 >
@@ -231,6 +233,7 @@ export default function DateRangePicker({ startDate, endDate, onDateChange, minD
                             <h4 className="drp-header-title">{singleDate ? 'Pilih Tanggal Sewa' : 'Pilih Rentang Tanggal'}</h4>
                             <button
                                 type="button"
+                                aria-label="Tutup pemilih tanggal"
                                 className="drp-close-btn"
                                 onClick={() => setIsOpen(false)}
                             >
@@ -268,6 +271,7 @@ export default function DateRangePicker({ startDate, endDate, onDateChange, minD
                                 <div className="drp-month-nav">
                                     <button
                                         type="button"
+                                        aria-label="Bulan sebelumnya"
                                         className="drp-nav-btn"
                                         onClick={goToPrevMonth}
                                         disabled={!canGoPrev()}
@@ -300,6 +304,7 @@ export default function DateRangePicker({ startDate, endDate, onDateChange, minD
                                     </span>
                                     <button
                                         type="button"
+                                        aria-label="Bulan berikutnya"
                                         className="drp-nav-btn"
                                         onClick={goToNextMonth}
                                     >

@@ -25,9 +25,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="id" className={`${inter.variable} ${playfair.variable}`} data-theme={theme === 'light' ? 'light' : undefined}>
-      <head>
-        <link rel="preload" href="/hero-car.jpg" as="image" type="image/jpeg" fetchPriority="high" />
-      </head>
+      <head />
       <body className="font-sans antialiased">
         <ThemeProvider initialTheme={theme}>
           {children}

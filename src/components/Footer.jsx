@@ -1,5 +1,6 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import { Car, Phone, Mail, MapPin } from 'lucide-react';
+import Image from 'next/image';
 import { FacebookIcon, InstagramIcon, TikTokIcon } from './Icons';
 
 export default function Footer() {
@@ -10,7 +11,7 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="lg:col-span-1">
                         <Link href="/" className="inline-flex items-center gap-2.5 mb-6 group">
-                            <img src="/favicon.ico" alt="Logo" className="w-10 h-10" />
+                            <Image src="/favicon.ico" alt="PointRental Logo" width={40} height={40} />
                             <span className="text-xl font-bold tracking-tight">
                                 Point<span className="text-[#C5A059]">Rental</span>
                             </span>
@@ -80,13 +81,13 @@ export default function Footer() {
 
                     {/* Social Media Icons */}
                     <div className="flex items-center gap-5">
-                        <Link target="_blank" href="https://www.facebook.com/" aria-label="Facebook" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
+                        <Link target="_blank" rel="noopener noreferrer" href="https://www.facebook.com/" aria-label="Facebook" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
                             <FacebookIcon className="w-4 h-4" />
                         </Link>
-                        <Link target="_blank" href="https://www.instagram.com/" aria-label="Instagram" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
+                        <Link target="_blank" rel="noopener noreferrer" href="https://www.instagram.com/" aria-label="Instagram" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
                             <InstagramIcon className="w-4 h-4" />
                         </Link>
-                        <Link target="_blank" href="https://www.tiktok.com/" aria-label="TikTok" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
+                        <Link target="_blank" rel="noopener noreferrer" href="https://www.tiktok.com/" aria-label="TikTok" className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#C5A059] hover:border-[#C5A059] transition-all">
                             <TikTokIcon className="w-4 h-4" />
                         </Link>
                     </div>
